@@ -25,7 +25,7 @@ class Role(Base):
     __tablename__ = "roles"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(60), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(60), unique=True)
     display_name: Mapped[str] = mapped_column(String(120))
     description: Mapped[str] = mapped_column(String(255), default="")
     users: Mapped[list["User"]] = relationship(back_populates="role")
@@ -40,7 +40,7 @@ class Permission(Base):
     __tablename__ = "permissions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    code: Mapped[str] = mapped_column(String(80), unique=True, index=True)
+    code: Mapped[str] = mapped_column(String(80), unique=True)
     display_name: Mapped[str] = mapped_column(String(120))
     description: Mapped[str] = mapped_column(String(255), default="")
     roles: Mapped[list[Role]] = relationship(
@@ -53,7 +53,7 @@ class User(Base):
     __tablename__ = "users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(80), unique=True, index=True)
+    username: Mapped[str] = mapped_column(String(80), unique=True)
     display_name: Mapped[str] = mapped_column(String(160))
     password_hash: Mapped[str] = mapped_column(String(255))
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), index=True)

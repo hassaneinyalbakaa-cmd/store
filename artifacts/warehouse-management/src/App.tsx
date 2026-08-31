@@ -5,7 +5,10 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppShell } from '@/components/app-shell';
 import { Notice } from '@/components/ui';
-import { useGetCurrentUser } from '@workspace/api-client-react';
+import {
+  getGetCurrentUserQueryKey,
+  useGetCurrentUser,
+} from '@workspace/api-client-react';
 import type { SessionUser } from '@workspace/api-client-react';
 import DashboardPage from '@/pages/dashboard';
 import LoginPage from '@/pages/login';
@@ -69,9 +72,8 @@ function App() {
 function AuthAwareRouter() {
   const currentUser = useGetCurrentUser({
     request: { credentials: 'include' },
-    query: { retry: false },
+    query: { retry: false, queryKey: getGetCurrentUserQueryKey() },
   });
-  if (currentUser.isLoading && !currentUser.error) return <div className="flex min-h-[100dvh] items-center justify-center bg-background" dir="rtl"><div className="w-64 space-y-3" data-testid="loading-session"><div className="h-2 animate-pulse rounded bg-muted" /><div className="h-2 w-3/4 animate-pulse rounded bg-muted" /><div className="h-2 w-1/2 animate-pulse rounded bg-muted" /></div></div>;
   return <Router user={currentUser.data || null} />;
 }
 

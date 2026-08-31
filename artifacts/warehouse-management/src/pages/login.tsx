@@ -17,7 +17,7 @@ export default function LoginPage() {
   const queryClient = useQueryClient();
   const currentUser = useGetCurrentUser({
     request: { credentials: 'include' },
-    query: { retry: false },
+    query: { retry: false, queryKey: getGetCurrentUserQueryKey() },
   });
   const login = useLogin({ request: { credentials: 'include' } });
   const [username, setUsername] = useState('');
@@ -86,8 +86,8 @@ export default function LoginPage() {
             </div>
             <form onSubmit={submit} className="space-y-5">
               {formError && <Notice>{formError}</Notice>}
-              <Field label="اسم المستخدم" name="username" value={username} onChange={setUsername} placeholder="مثال: ahmed.warehouse" required />
-              <Field label="كلمة المرور" name="password" type="password" value={password} onChange={setPassword} placeholder="أدخل كلمة المرور" required />
+               <Field label="اسم المستخدم" name="username" value={username} onChange={setUsername} placeholder="مثال: ahmed.warehouse" autoComplete="username" required />
+               <Field label="كلمة المرور" name="password" type="password" value={password} onChange={setPassword} placeholder="أدخل كلمة المرور" autoComplete="current-password" required />
               <Button type="submit" testId="button-login" className="mt-3 w-full" disabled={login.isPending || !username || !password}>
                 {login.isPending ? 'جارٍ التحقق...' : <>دخول إلى النظام <ArrowLeft className="h-4 w-4" /></>}
               </Button>

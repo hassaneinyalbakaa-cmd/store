@@ -49,6 +49,7 @@ export function Field({
   required = false,
   hint,
   disabled = false,
+  autoComplete,
 }: {
   label: string;
   name: string;
@@ -59,6 +60,7 @@ export function Field({
   required?: boolean;
   hint?: string;
   disabled?: boolean;
+  autoComplete?: string;
 }) {
   return (
     <label className="block space-y-2 text-right">
@@ -74,6 +76,7 @@ export function Field({
         placeholder={placeholder}
         required={required}
         disabled={disabled}
+        autoComplete={autoComplete}
         data-testid={`input-${name}`}
         className="h-11 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground outline-none transition-[border-color,box-shadow] placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 disabled:opacity-60"
       />
