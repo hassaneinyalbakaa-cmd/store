@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "نظام إدارة المخزن"
+description = "نظام ويب داخلي عربي لإدارة مستخدمي المخزن وأدوارهم وصلاحياتهم، مع تسجيل دخول ولوحة رئيسية أولية قابلة للتوسعة."
+version = "1.0.0"
+id = "artifacts/warehouse-management"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18932
+
+[services.development]
+run = "pnpm --filter @workspace/warehouse-management run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/warehouse-management", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/warehouse-management/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "18932"
+BASE_PATH = "/"

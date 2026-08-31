@@ -1,44 +1,57 @@
-# [Project name]
+# نظام إدارة المخزن
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+نظام ويب داخلي عربي لإدارة مستخدمي المخزن وأدوارهم وصلاحياتهم، مع تسجيل دخول ولوحة رئيسية أولية قابلة للتوسعة.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `uv run alembic upgrade head` — apply PostgreSQL migrations
+- `uv run python -m backend.seed` — create the initial roles, permissions, and admin user
+- `uv run uvicorn backend.app.main:app --host 0.0.0.0 --port 8080` — run the FastAPI server
+- `pnpm --filter @workspace/warehouse-management run dev` — run the React frontend
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `DATABASE_URL`, `SESSION_SECRET`
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
+- pnpm workspaces, Node.js 24, TypeScript 5.9, Python 3.11
+- Frontend: React + Vite
+- API: Python FastAPI
+- DB: PostgreSQL + SQLAlchemy asyncpg
+- Migrations: Alembic
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `backend/app/` — FastAPI application, session authentication, routes, models, and settings
+- `backend/alembic/` — migration environment and PostgreSQL migrations
+- `backend/seed.py` — initial access-control data and the first administrator
+- `artifacts/warehouse-management/` — React RTL frontend
+- `lib/api-spec/openapi.yaml` — source of truth for API contracts and generated client hooks
+- `.env.example` — environment settings template
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Authentication uses database-backed opaque session cookies rather than browser-stored tokens, which suits a local-network deployment.
+- Role permissions are represented as a many-to-many relationship so new permissions can be added without changing user records.
+- The API is mounted below `/api` and the frontend uses relative requests so the local-network proxy can route both services.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Arabic RTL login and protected initial dashboard.
+- User administration with three seeded roles: مدير النظام، أمين المخزن، موظف القسم.
+- Basic permission checks for dashboard, user management, and roles/permissions views.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- The current phase intentionally excludes inventory items, receiving, issuing, transfers, stocktaking, and reports.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Apply Alembic migrations before seeding or starting FastAPI.
+- The seeded development administrator is `admin` / `Admin@12345`; change it after first login in a real deployment.
 
 ## Pointers
 
