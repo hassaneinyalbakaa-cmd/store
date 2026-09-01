@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Table, Column, func
+from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, Table, Column, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -79,3 +79,77 @@ class UserSession(Base):
         DateTime(timezone=True), server_default=func.now()
     )
     user: Mapped[User] = relationship(back_populates="sessions")
+
+
+class Warehouse(Base):
+    __tablename__ = "warehouses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120))
+    code: Mapped[str] = mapped_column(String(40), unique=True)
+    description: Mapped[str] = mapped_column(String(255), default="")
+    warehouse_type: Mapped[str] = mapped_column(String(20), default="branch", server_default="branch")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    locations: Mapped[list["StorageLocation"]] = relationship(
+        back_populates="warehouse", cascade="all, delete-orphan"
+    )
+    items: Mapped[list["Item"]] = relationship(back_populates="warehouse")
+
+
+class Department(Base):
+    __tablename__ = "departments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(120))
+    code: Mapped[str] = mapped_column(String(40), unique=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+
+
+class StorageLocation(Base):
+    __tablename__ = "storage_locations"
+    __table_args__ = (
+        UniqueConstraint("warehouse_id", "area", "shelf", "bin", name="uq_storage_location_coordinates"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    warehouse_id: Mapped[int] = mapped_column(
+        ForeignKey("warehouses.id", ondelete="CASCADE"), index=True
+    )
+    area: Mapped[str] = mapped_column(String(80))
+    shelf: Mapped[str] = mapped_column(String(80))
+    bin: Mapped[str] = mapped_column(String(80))
+    warehouse: Mapped[Warehouse] = relationship(back_populates="locations")
+    items: Mapped[list["Item"]] = relationship(back_populates="storage_location")
+
+
+class Item(Base):
+    __tablename__ = "items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    code: Mapped[str] = mapped_column(String(80), unique=True)
+    name: Mapped[str] = mapped_column(String(160))
+    description: Mapped[str] = mapped_column(String(255), default="")
+    category: Mapped[str] = mapped_column(String(120), default="")
+    unit: Mapped[str] = mapped_column(String(60))
+    part_number: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    minimum_level: Mapped[float] = mapped_column(Float, default=0, server_default="0")
+    warehouse_id: Mapped[int] = mapped_column(
+        ForeignKey("warehouses.id"), index=True
+    )
+    storage_location_id: Mapped[int | None] = mapped_column(
+        ForeignKey("storage_locations.id"), nullable=True, index=True
+    )
+    requires_serial_number: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false"
+    )
+    requires_expiry_date: Mapped[bool] = mapped_column(
+        Boolean, default=False, server_default="false"
+    )
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    warehouse: Mapped[Warehouse] = relationship(back_populates="items", lazy="selectin")
+    storage_location: Mapped[StorageLocation | None] = relationship(
+        back_populates="items", lazy="selectin"
+    )

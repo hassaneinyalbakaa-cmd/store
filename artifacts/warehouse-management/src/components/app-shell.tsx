@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Box, ChevronLeft, ClipboardList, LogOut, Menu, ShieldCheck, Users, X } from 'lucide-react';
+import { Archive, Box, Building2, ChevronLeft, ClipboardList, LogOut, Menu, ShieldCheck, Users, Warehouse, X } from 'lucide-react';
 import type { SessionUser } from '@workspace/api-client-react';
 import { useLogout } from '@workspace/api-client-react';
 import { getGetCurrentUserQueryKey } from '@workspace/api-client-react';
@@ -10,6 +10,9 @@ const navigation = [
   { href: '/dashboard', label: 'نظرة عامة', icon: ClipboardList, permission: null },
   { href: '/users', label: 'المستخدمون', icon: Users, permission: 'users:read' },
   { href: '/roles', label: 'الأدوار والصلاحيات', icon: ShieldCheck, permission: null },
+  { href: '/warehouses', label: 'المخازن', icon: Warehouse, permission: 'warehouses:read' },
+  { href: '/departments', label: 'الأقسام', icon: Building2, permission: 'departments:read' },
+  { href: '/items', label: 'الأصناف', icon: Archive, permission: 'items:read' },
 ];
 
 export function AppShell({ user, children }: { user: SessionUser; children: ReactNode }) {

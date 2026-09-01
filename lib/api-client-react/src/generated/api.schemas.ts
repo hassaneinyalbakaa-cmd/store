@@ -78,10 +78,168 @@ export interface Permission {
   description: string;
 }
 
+export type WarehouseWarehouseType = typeof WarehouseWarehouseType[keyof typeof WarehouseWarehouseType];
+
+
+export const WarehouseWarehouseType = {
+  main: 'main',
+  branch: 'branch',
+} as const;
+
+export interface Warehouse {
+  id: number;
+  name: string;
+  code: string;
+  description: string;
+  warehouse_type: WarehouseWarehouseType;
+  is_active: boolean;
+}
+
+export type WarehouseInputWarehouseType = typeof WarehouseInputWarehouseType[keyof typeof WarehouseInputWarehouseType];
+
+
+export const WarehouseInputWarehouseType = {
+  main: 'main',
+  branch: 'branch',
+} as const;
+
+export interface WarehouseInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  code: string;
+  description?: string;
+  warehouse_type: WarehouseInputWarehouseType;
+  is_active?: boolean;
+}
+
+export type WarehouseUpdateWarehouseType = typeof WarehouseUpdateWarehouseType[keyof typeof WarehouseUpdateWarehouseType];
+
+
+export const WarehouseUpdateWarehouseType = {
+  main: 'main',
+  branch: 'branch',
+} as const;
+
+export interface WarehouseUpdate {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  code?: string;
+  description?: string;
+  warehouse_type?: WarehouseUpdateWarehouseType;
+  is_active?: boolean;
+}
+
+export interface Department {
+  id: number;
+  name: string;
+  code: string;
+  is_active: boolean;
+}
+
+export interface DepartmentInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  code: string;
+  is_active?: boolean;
+}
+
+export interface DepartmentUpdate {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  code?: string;
+  is_active?: boolean;
+}
+
+export interface StorageLocation {
+  id: number;
+  warehouse_id: number;
+  area: string;
+  shelf: string;
+  bin: string;
+}
+
+export interface StorageLocationInput {
+  /** @minLength 1 */
+  area: string;
+  /** @minLength 1 */
+  shelf: string;
+  /** @minLength 1 */
+  bin: string;
+}
+
+export interface Item {
+  id: number;
+  code: string;
+  name: string;
+  description: string;
+  category: string;
+  unit: string;
+  /** @nullable */
+  part_number: string | null;
+  minimum_level: number;
+  warehouse_id: number;
+  warehouse_name: string;
+  storage_location: StorageLocation | null;
+  requires_serial_number: boolean;
+  requires_expiry_date: boolean;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ItemInput {
+  /** @minLength 1 */
+  code: string;
+  /** @minLength 1 */
+  name: string;
+  description?: string;
+  category?: string;
+  /** @minLength 1 */
+  unit: string;
+  /** @nullable */
+  part_number?: string | null;
+  /** @minimum 0 */
+  minimum_level?: number;
+  warehouse_id: number;
+  storage_location?: StorageLocationInput | null;
+  requires_serial_number?: boolean;
+  requires_expiry_date?: boolean;
+  is_active?: boolean;
+}
+
+export interface ItemUpdate {
+  /** @minLength 1 */
+  code?: string;
+  /** @minLength 1 */
+  name?: string;
+  description?: string;
+  category?: string;
+  /** @minLength 1 */
+  unit?: string;
+  /** @nullable */
+  part_number?: string | null;
+  /** @minimum 0 */
+  minimum_level?: number;
+  warehouse_id?: number;
+  storage_location?: StorageLocationInput | null;
+  requires_serial_number?: boolean;
+  requires_expiry_date?: boolean;
+  is_active?: boolean;
+}
+
 export interface DashboardSummary {
   users_total: number;
   active_users: number;
   roles_total: number;
   permissions_total: number;
 }
+
+export type ListItemsParams = {
+search?: string;
+warehouseId?: number;
+isActive?: boolean;
+};
 

@@ -13,6 +13,12 @@ PERMISSIONS = [
     ("users:read", "عرض المستخدمين", "عرض قائمة مستخدمي النظام"),
     ("users:write", "إدارة المستخدمين", "إنشاء وتعديل المستخدمين"),
     ("roles:read", "عرض الأدوار والصلاحيات", "عرض أدوار النظام وصلاحياتها"),
+    ("warehouses:read", "عرض المخازن", "عرض قائمة المخازن"),
+    ("warehouses:write", "إدارة المخازن", "إنشاء وتعديل المخازن"),
+    ("departments:read", "عرض الأقسام", "عرض قائمة الأقسام"),
+    ("departments:write", "إدارة الأقسام", "إنشاء وتعديل الأقسام"),
+    ("items:read", "عرض الأصناف", "عرض والبحث في دليل الأصناف"),
+    ("items:write", "إدارة الأصناف", "إنشاء وتعديل وتعطيل الأصناف"),
 ]
 
 ROLES = [
@@ -20,13 +26,32 @@ ROLES = [
         "admin",
         "مدير النظام",
         "إدارة كاملة للمستخدمين والأدوار والصلاحيات",
-        ["dashboard:read", "users:read", "users:write", "roles:read"],
+        [
+            "dashboard:read",
+            "users:read",
+            "users:write",
+            "roles:read",
+            "warehouses:read",
+            "warehouses:write",
+            "departments:read",
+            "departments:write",
+            "items:read",
+            "items:write",
+        ],
     ),
     (
         "warehouse_keeper",
         "أمين المخزن",
         "الوصول التشغيلي للمخزن مع قراءة المستخدمين",
-        ["dashboard:read", "users:read", "roles:read"],
+        [
+            "dashboard:read",
+            "users:read",
+            "roles:read",
+            "warehouses:read",
+            "departments:read",
+            "items:read",
+            "items:write",
+        ],
     ),
     (
         "department_employee",

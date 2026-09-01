@@ -171,3 +171,282 @@ export const ListPermissionsResponseItem = zod.object({
 export const ListPermissionsResponse = zod.array(ListPermissionsResponseItem)
 
 
+/**
+ * @summary List warehouses
+ */
+export const ListWarehousesResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "code": zod.string(),
+  "description": zod.string(),
+  "warehouse_type": zod.enum(['main', 'branch']),
+  "is_active": zod.boolean()
+})
+export const ListWarehousesResponse = zod.array(ListWarehousesResponseItem)
+
+
+/**
+ * @summary Create warehouse
+ */
+
+
+
+
+export const CreateWarehouseBody = zod.object({
+  "name": zod.string().min(1),
+  "code": zod.string().min(1),
+  "description": zod.string().optional(),
+  "warehouse_type": zod.enum(['main', 'branch']),
+  "is_active": zod.boolean().optional()
+})
+
+export const CreateWarehouseResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "code": zod.string(),
+  "description": zod.string(),
+  "warehouse_type": zod.enum(['main', 'branch']),
+  "is_active": zod.boolean()
+})
+
+
+/**
+ * @summary Update warehouse
+ */
+export const UpdateWarehouseParams = zod.object({
+  "warehouseId": zod.coerce.number()
+})
+
+
+
+
+
+export const UpdateWarehouseBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "code": zod.string().min(1).optional(),
+  "description": zod.string().optional(),
+  "warehouse_type": zod.enum(['main', 'branch']).optional(),
+  "is_active": zod.boolean().optional()
+})
+
+export const UpdateWarehouseResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "code": zod.string(),
+  "description": zod.string(),
+  "warehouse_type": zod.enum(['main', 'branch']),
+  "is_active": zod.boolean()
+})
+
+
+/**
+ * @summary List departments
+ */
+export const ListDepartmentsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "code": zod.string(),
+  "is_active": zod.boolean()
+})
+export const ListDepartmentsResponse = zod.array(ListDepartmentsResponseItem)
+
+
+/**
+ * @summary Create department
+ */
+
+
+
+
+export const CreateDepartmentBody = zod.object({
+  "name": zod.string().min(1),
+  "code": zod.string().min(1),
+  "is_active": zod.boolean().optional()
+})
+
+export const CreateDepartmentResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "code": zod.string(),
+  "is_active": zod.boolean()
+})
+
+
+/**
+ * @summary Update department
+ */
+export const UpdateDepartmentParams = zod.object({
+  "departmentId": zod.coerce.number()
+})
+
+
+
+
+
+export const UpdateDepartmentBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "code": zod.string().min(1).optional(),
+  "is_active": zod.boolean().optional()
+})
+
+export const UpdateDepartmentResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "code": zod.string(),
+  "is_active": zod.boolean()
+})
+
+
+/**
+ * @summary List items
+ */
+export const ListItemsQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "warehouseId": zod.coerce.number().optional(),
+  "isActive": zod.coerce.boolean().optional()
+})
+
+export const ListItemsResponseItem = zod.object({
+  "id": zod.number(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "category": zod.string(),
+  "unit": zod.string(),
+  "part_number": zod.string().nullable(),
+  "minimum_level": zod.number(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "requires_serial_number": zod.boolean(),
+  "requires_expiry_date": zod.boolean(),
+  "is_active": zod.boolean(),
+  "created_at": zod.coerce.date()
+})
+export const ListItemsResponse = zod.array(ListItemsResponseItem)
+
+
+/**
+ * @summary Create item
+ */
+
+
+
+export const createItemBodyMinimumLevelMin = 0;
+
+
+
+
+
+
+export const CreateItemBody = zod.object({
+  "code": zod.string().min(1),
+  "name": zod.string().min(1),
+  "description": zod.string().optional(),
+  "category": zod.string().optional(),
+  "unit": zod.string().min(1),
+  "part_number": zod.string().nullish(),
+  "minimum_level": zod.number().min(createItemBodyMinimumLevelMin).optional(),
+  "warehouse_id": zod.number(),
+  "storage_location": zod.union([zod.object({
+  "area": zod.string().min(1),
+  "shelf": zod.string().min(1),
+  "bin": zod.string().min(1)
+}),zod.null()]).optional(),
+  "requires_serial_number": zod.boolean().optional(),
+  "requires_expiry_date": zod.boolean().optional(),
+  "is_active": zod.boolean().optional()
+})
+
+export const CreateItemResponse = zod.object({
+  "id": zod.number(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "category": zod.string(),
+  "unit": zod.string(),
+  "part_number": zod.string().nullable(),
+  "minimum_level": zod.number(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "requires_serial_number": zod.boolean(),
+  "requires_expiry_date": zod.boolean(),
+  "is_active": zod.boolean(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Update or disable item
+ */
+export const UpdateItemParams = zod.object({
+  "itemId": zod.coerce.number()
+})
+
+
+
+
+export const updateItemBodyMinimumLevelMin = 0;
+
+
+
+
+
+
+export const UpdateItemBody = zod.object({
+  "code": zod.string().min(1).optional(),
+  "name": zod.string().min(1).optional(),
+  "description": zod.string().optional(),
+  "category": zod.string().optional(),
+  "unit": zod.string().min(1).optional(),
+  "part_number": zod.string().nullish(),
+  "minimum_level": zod.number().min(updateItemBodyMinimumLevelMin).optional(),
+  "warehouse_id": zod.number().optional(),
+  "storage_location": zod.union([zod.object({
+  "area": zod.string().min(1),
+  "shelf": zod.string().min(1),
+  "bin": zod.string().min(1)
+}),zod.null()]).optional(),
+  "requires_serial_number": zod.boolean().optional(),
+  "requires_expiry_date": zod.boolean().optional(),
+  "is_active": zod.boolean().optional()
+})
+
+export const UpdateItemResponse = zod.object({
+  "id": zod.number(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "category": zod.string(),
+  "unit": zod.string(),
+  "part_number": zod.string().nullable(),
+  "minimum_level": zod.number(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "requires_serial_number": zod.boolean(),
+  "requires_expiry_date": zod.boolean(),
+  "is_active": zod.boolean(),
+  "created_at": zod.coerce.date()
+})
+
+

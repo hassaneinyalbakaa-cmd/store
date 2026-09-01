@@ -11,9 +11,12 @@ import {
 } from '@workspace/api-client-react';
 import type { SessionUser } from '@workspace/api-client-react';
 import DashboardPage from '@/pages/dashboard';
+import DepartmentsPage from '@/pages/departments';
+import ItemsPage from '@/pages/items';
 import LoginPage from '@/pages/login';
 import RolesPage from '@/pages/roles';
 import UsersPage from '@/pages/users';
+import WarehousesPage from '@/pages/warehouses';
 import NotFound from '@/pages/not-found';
 import {
   Route,
@@ -45,6 +48,9 @@ function Router({ user }: { user: SessionUser | null }) {
         <Route path="/dashboard">{() => user ? <Protected user={user}><DashboardPage user={user} /></Protected> : <LoginPage />}</Route>
         <Route path="/users">{() => user ? <Protected user={user} permission="users:read"><UsersPage canWrite={user.permissions.includes('users:write')} /></Protected> : <LoginPage />}</Route>
         <Route path="/roles">{() => user ? <Protected user={user}><RolesPage /></Protected> : <LoginPage />}</Route>
+        <Route path="/warehouses">{() => user ? <Protected user={user} permission="warehouses:read"><WarehousesPage /></Protected> : <LoginPage />}</Route>
+        <Route path="/departments">{() => user ? <Protected user={user} permission="departments:read"><DepartmentsPage /></Protected> : <LoginPage />}</Route>
+        <Route path="/items">{() => user ? <Protected user={user} permission="items:read"><ItemsPage /></Protected> : <LoginPage />}</Route>
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
