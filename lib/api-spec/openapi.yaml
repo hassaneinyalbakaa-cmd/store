@@ -28,6 +28,10 @@ tags:
     description: Goods receipt notes
   - name: inventory
     description: Inventory movements, balances, and expiry
+  - name: issue_requests
+    description: Department issue requests and their workflow
+  - name: issue_vouchers
+    description: Completed inventory issue vouchers
 paths:
   /healthz:
     get:
@@ -825,6 +829,429 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /issue-requests:
+    get:
+      operationId: listIssueRequests
+      tags: [issue_requests]
+      summary: List issue requests
+      responses:
+        "200":
+          description: Issue requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IssueRequest"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createIssueRequest
+      tags: [issue_requests]
+      summary: Create a draft issue request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueRequestInput"
+      responses:
+        "201":
+          description: Draft issue request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueRequest"
+        "400":
+          description: Invalid department, item, or quantity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /issue-requests/{requestId}:
+    get:
+      operationId: getIssueRequest
+      tags: [issue_requests]
+      summary: Get an issue request
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Issue request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueRequest"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Issue request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /issue-requests/{requestId}/submit:
+    post:
+      operationId: submitIssueRequest
+      tags: [issue_requests]
+      summary: Submit a draft issue request
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Submitted issue request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueRequest"
+        "400":
+          description: Invalid status transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Issue request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /issue-requests/{requestId}/approve:
+    post:
+      operationId: approveIssueRequest
+      tags: [issue_requests]
+      summary: Approve a submitted issue request
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Approved issue request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueRequest"
+        "400":
+          description: Invalid status transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Issue request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /issue-requests/{requestId}/reject:
+    post:
+      operationId: rejectIssueRequest
+      tags: [issue_requests]
+      summary: Reject a submitted issue request
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueRequestRejectionInput"
+      responses:
+        "200":
+          description: Rejected issue request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueRequest"
+        "400":
+          description: Rejection reason or status is invalid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Issue request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /issue-requests/{requestId}/issue-preview:
+    get:
+      operationId: getIssueRequestPreview
+      tags: [issue_requests]
+      summary: Preview availability for an approved issue request
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Current balance and serial availability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueRequestPreview"
+        "400":
+          description: Request is not approved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Issue request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /issue-requests/{requestId}/issue:
+    post:
+      operationId: issueRequest
+      tags: [issue_requests]
+      summary: Issue an approved request and create a voucher
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueRequestIssueInput"
+      responses:
+        "201":
+          description: Issue voucher
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueVoucher"
+        "400":
+          description: Insufficient balance, serial, or invalid status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Issue request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /issue-requests/{requestId}/close:
+    post:
+      operationId: closeIssueRequest
+      tags: [issue_requests]
+      summary: Close an issued request
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Closed issue request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueRequest"
+        "400":
+          description: Invalid status transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Issue request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /issue-vouchers:
+    get:
+      operationId: listIssueVouchers
+      tags: [issue_vouchers]
+      summary: List issue vouchers
+      responses:
+        "200":
+          description: Completed issue vouchers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IssueVoucher"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /issue-vouchers/{voucherId}:
+    get:
+      operationId: getIssueVoucher
+      tags: [issue_vouchers]
+      summary: Get an issue voucher
+      parameters:
+        - name: voucherId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Issue voucher
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IssueVoucher"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Issue voucher not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -1285,7 +1712,7 @@ components:
           type: number
         movement_type:
           type: string
-          enum: [opening, receipt]
+          enum: [opening, receipt, issue]
         movement_date:
           type: string
           format: date
@@ -1393,6 +1820,166 @@ components:
         notes:
           type: string
       required: [movement_date, item_id, quantity, warehouse_id]
+    IssueRequestStatus:
+      type: string
+      enum: [draft, sent, approved, rejected, issued, closed]
+    IssueRequest:
+      type: object
+      properties:
+        id:
+          type: number
+        request_number:
+          type: string
+        department_id:
+          type: number
+        department_name:
+          type: string
+        request_date:
+          type: string
+          format: date
+        reason:
+          type: string
+        item_id:
+          type: number
+        item_code:
+          type: string
+        item_name:
+          type: string
+        item_unit:
+          type: string
+        warehouse_id:
+          type: number
+        warehouse_name:
+          type: string
+        quantity:
+          type: number
+        current_balance:
+          type: number
+        available_quantity:
+          type: number
+        notes:
+          type: string
+        status:
+          $ref: "#/components/schemas/IssueRequestStatus"
+        rejection_reason:
+          type: ["string", "null"]
+        created_by_id:
+          type: number
+        created_by_name:
+          type: string
+        issue_voucher_id:
+          type: ["number", "null"]
+        issue_number:
+          type: ["string", "null"]
+        created_at:
+          type: string
+          format: date-time
+      required: [id, request_number, department_id, department_name, request_date, reason, item_id, item_code, item_name, item_unit, warehouse_id, warehouse_name, quantity, current_balance, available_quantity, notes, status, rejection_reason, created_by_id, created_by_name, issue_voucher_id, issue_number, created_at]
+    IssueRequestInput:
+      type: object
+      properties:
+        department_id:
+          type: number
+        request_date:
+          type: string
+          format: date
+        reason:
+          type: string
+          minLength: 1
+        item_id:
+          type: number
+        quantity:
+          type: number
+          exclusiveMinimum: 0
+        notes:
+          type: string
+      required: [department_id, request_date, reason, item_id, quantity]
+    IssueRequestRejectionInput:
+      type: object
+      properties:
+        rejection_reason:
+          type: string
+          minLength: 1
+      required: [rejection_reason]
+    IssueRequestIssueInput:
+      type: object
+      properties:
+        serial_numbers:
+          type: array
+          items:
+            type: string
+      required: []
+    IssueRequestPreview:
+      type: object
+      properties:
+        request_id:
+          type: number
+        request_number:
+          type: string
+        item_id:
+          type: number
+        item_name:
+          type: string
+        item_unit:
+          type: string
+        warehouse_id:
+          type: number
+        warehouse_name:
+          type: string
+        requested_quantity:
+          type: number
+        current_balance:
+          type: number
+        available_quantity:
+          type: number
+        requires_serial_number:
+          type: boolean
+        available_serial_numbers:
+          type: array
+          items:
+            type: string
+      required: [request_id, request_number, item_id, item_name, item_unit, warehouse_id, warehouse_name, requested_quantity, current_balance, available_quantity, requires_serial_number, available_serial_numbers]
+    IssueVoucher:
+      type: object
+      properties:
+        id:
+          type: number
+        issue_number:
+          type: string
+        request_id:
+          type: number
+        request_number:
+          type: string
+        department_id:
+          type: number
+        department_name:
+          type: string
+        item_id:
+          type: number
+        item_code:
+          type: string
+        item_name:
+          type: string
+        item_unit:
+          type: string
+        warehouse_id:
+          type: number
+        warehouse_name:
+          type: string
+        quantity:
+          type: number
+        serial_numbers:
+          type: array
+          items:
+            type: string
+        issued_by_id:
+          type: number
+        issued_by_name:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+      required: [id, issue_number, request_id, request_number, department_id, department_name, item_id, item_code, item_name, item_unit, warehouse_id, warehouse_name, quantity, serial_numbers, issued_by_id, issued_by_name, issued_at]
     DashboardSummary:
       type: object
       properties:

@@ -282,6 +282,7 @@ export type InventoryMovementMovementType = typeof InventoryMovementMovementType
 export const InventoryMovementMovementType = {
   opening: 'opening',
   receipt: 'receipt',
+  issue: 'issue',
 } as const;
 
 export interface InventoryMovement {
@@ -349,6 +350,102 @@ export interface OpeningBalanceInput {
   expiry_date?: string | null;
   serial_numbers?: string[];
   notes?: string;
+}
+
+export type IssueRequestStatus = typeof IssueRequestStatus[keyof typeof IssueRequestStatus];
+
+
+export const IssueRequestStatus = {
+  draft: 'draft',
+  sent: 'sent',
+  approved: 'approved',
+  rejected: 'rejected',
+  issued: 'issued',
+  closed: 'closed',
+} as const;
+
+export interface IssueRequest {
+  id: number;
+  request_number: string;
+  department_id: number;
+  department_name: string;
+  request_date: string;
+  reason: string;
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  item_unit: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  quantity: number;
+  current_balance: number;
+  available_quantity: number;
+  notes: string;
+  status: IssueRequestStatus;
+  /** @nullable */
+  rejection_reason: string | null;
+  created_by_id: number;
+  created_by_name: string;
+  /** @nullable */
+  issue_voucher_id: number | null;
+  /** @nullable */
+  issue_number: string | null;
+  created_at: string;
+}
+
+export interface IssueRequestInput {
+  department_id: number;
+  request_date: string;
+  /** @minLength 1 */
+  reason: string;
+  item_id: number;
+  /** @exclusiveMinimum 0 */
+  quantity: number;
+  notes?: string;
+}
+
+export interface IssueRequestRejectionInput {
+  /** @minLength 1 */
+  rejection_reason: string;
+}
+
+export interface IssueRequestIssueInput {
+  serial_numbers?: string[];
+}
+
+export interface IssueRequestPreview {
+  request_id: number;
+  request_number: string;
+  item_id: number;
+  item_name: string;
+  item_unit: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  requested_quantity: number;
+  current_balance: number;
+  available_quantity: number;
+  requires_serial_number: boolean;
+  available_serial_numbers: string[];
+}
+
+export interface IssueVoucher {
+  id: number;
+  issue_number: string;
+  request_id: number;
+  request_number: string;
+  department_id: number;
+  department_name: string;
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  item_unit: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  quantity: number;
+  serial_numbers: string[];
+  issued_by_id: number;
+  issued_by_name: string;
+  issued_at: string;
 }
 
 export interface DashboardSummary {

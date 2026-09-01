@@ -12,4 +12,5 @@ export type InventoryMovementMovementType = typeof InventoryMovementMovementType
 export const InventoryMovementMovementType = {
   opening: 'opening',
   receipt: 'receipt',
+  issue: 'issue',
 } as const;

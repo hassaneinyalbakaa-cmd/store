@@ -29,6 +29,12 @@ import type {
   InventoryBalance,
   InventoryExpiry,
   InventoryMovement,
+  IssueRequest,
+  IssueRequestInput,
+  IssueRequestIssueInput,
+  IssueRequestPreview,
+  IssueRequestRejectionInput,
+  IssueVoucher,
   Item,
   ItemInput,
   ItemUpdate,
@@ -2025,4 +2031,817 @@ export const useCreateOpeningBalance = <TError = ErrorType<ErrorResponse>,
       > => {
       return useMutation(getCreateOpeningBalanceMutationOptions(options));
     }
+
+export const getListIssueRequestsUrl = () => {
+
+
+
+
+  return `/api/issue-requests`
+}
+
+/**
+ * @summary List issue requests
+ */
+export const listIssueRequests = async ( options?: Parameters<typeof customFetch>[1]): Promise<IssueRequest[]> => {
+
+  return customFetch<IssueRequest[]>(getListIssueRequestsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListIssueRequestsQueryKey = () => {
+    return [
+    `/api/issue-requests`
+    ] as const;
+    }
+
+
+export const getListIssueRequestsQueryOptions = <TData = Awaited<ReturnType<typeof listIssueRequests>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listIssueRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListIssueRequestsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listIssueRequests>>> = ({ signal }) => listIssueRequests({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listIssueRequests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListIssueRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof listIssueRequests>>>
+export type ListIssueRequestsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List issue requests
+ */
+
+export function useListIssueRequests<TData = Awaited<ReturnType<typeof listIssueRequests>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listIssueRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListIssueRequestsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateIssueRequestUrl = () => {
+
+
+
+
+  return `/api/issue-requests`
+}
+
+/**
+ * @summary Create a draft issue request
+ */
+export const createIssueRequest = async (issueRequestInput: IssueRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<IssueRequest> => {
+
+  return customFetch<IssueRequest>(getCreateIssueRequestUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(issueRequestInput)
+  }
+);}
+
+
+
+
+
+export const getCreateIssueRequestMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createIssueRequest>>, TError,{data: BodyType<IssueRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createIssueRequest>>, TError,{data: BodyType<IssueRequestInput>}, TContext> => {
+
+const mutationKey = ['createIssueRequest'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createIssueRequest>>, {data: BodyType<IssueRequestInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createIssueRequest(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateIssueRequestMutationResult = NonNullable<Awaited<ReturnType<typeof createIssueRequest>>>
+    export type CreateIssueRequestMutationBody = BodyType<IssueRequestInput>
+    export type CreateIssueRequestMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Create a draft issue request
+ */
+export const useCreateIssueRequest = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createIssueRequest>>, TError,{data: BodyType<IssueRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createIssueRequest>>,
+        TError,
+        {data: BodyType<IssueRequestInput>},
+        TContext
+      > => {
+      return useMutation(getCreateIssueRequestMutationOptions(options));
+    }
+
+export const getGetIssueRequestUrl = (requestId: number,) => {
+
+
+
+
+  return `/api/issue-requests/${requestId}`
+}
+
+/**
+ * @summary Get an issue request
+ */
+export const getIssueRequest = async (requestId: number, options?: Parameters<typeof customFetch>[1]): Promise<IssueRequest> => {
+
+  return customFetch<IssueRequest>(getGetIssueRequestUrl(requestId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIssueRequestQueryKey = (requestId: number,) => {
+    return [
+    `/api/issue-requests/${requestId}`
+    ] as const;
+    }
+
+
+export const getGetIssueRequestQueryOptions = <TData = Awaited<ReturnType<typeof getIssueRequest>>, TError = ErrorType<ErrorResponse>>(requestId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIssueRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIssueRequestQueryKey(requestId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIssueRequest>>> = ({ signal }) => getIssueRequest(requestId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: requestId !== null && requestId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIssueRequest>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIssueRequestQueryResult = NonNullable<Awaited<ReturnType<typeof getIssueRequest>>>
+export type GetIssueRequestQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get an issue request
+ */
+
+export function useGetIssueRequest<TData = Awaited<ReturnType<typeof getIssueRequest>>, TError = ErrorType<ErrorResponse>>(
+ requestId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIssueRequest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIssueRequestQueryOptions(requestId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSubmitIssueRequestUrl = (requestId: number,) => {
+
+
+
+
+  return `/api/issue-requests/${requestId}/submit`
+}
+
+/**
+ * @summary Submit a draft issue request
+ */
+export const submitIssueRequest = async (requestId: number, options?: Parameters<typeof customFetch>[1]): Promise<IssueRequest> => {
+
+  return customFetch<IssueRequest>(getSubmitIssueRequestUrl(requestId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSubmitIssueRequestMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitIssueRequest>>, TError,{requestId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitIssueRequest>>, TError,{requestId: number}, TContext> => {
+
+const mutationKey = ['submitIssueRequest'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitIssueRequest>>, {requestId: number}> = (props) => {
+          const {requestId} = props ?? {};
+
+          return  submitIssueRequest(requestId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitIssueRequestMutationResult = NonNullable<Awaited<ReturnType<typeof submitIssueRequest>>>
+
+    export type SubmitIssueRequestMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Submit a draft issue request
+ */
+export const useSubmitIssueRequest = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitIssueRequest>>, TError,{requestId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitIssueRequest>>,
+        TError,
+        {requestId: number},
+        TContext
+      > => {
+      return useMutation(getSubmitIssueRequestMutationOptions(options));
+    }
+
+export const getApproveIssueRequestUrl = (requestId: number,) => {
+
+
+
+
+  return `/api/issue-requests/${requestId}/approve`
+}
+
+/**
+ * @summary Approve a submitted issue request
+ */
+export const approveIssueRequest = async (requestId: number, options?: Parameters<typeof customFetch>[1]): Promise<IssueRequest> => {
+
+  return customFetch<IssueRequest>(getApproveIssueRequestUrl(requestId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getApproveIssueRequestMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveIssueRequest>>, TError,{requestId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveIssueRequest>>, TError,{requestId: number}, TContext> => {
+
+const mutationKey = ['approveIssueRequest'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveIssueRequest>>, {requestId: number}> = (props) => {
+          const {requestId} = props ?? {};
+
+          return  approveIssueRequest(requestId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApproveIssueRequestMutationResult = NonNullable<Awaited<ReturnType<typeof approveIssueRequest>>>
+
+    export type ApproveIssueRequestMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Approve a submitted issue request
+ */
+export const useApproveIssueRequest = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveIssueRequest>>, TError,{requestId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof approveIssueRequest>>,
+        TError,
+        {requestId: number},
+        TContext
+      > => {
+      return useMutation(getApproveIssueRequestMutationOptions(options));
+    }
+
+export const getRejectIssueRequestUrl = (requestId: number,) => {
+
+
+
+
+  return `/api/issue-requests/${requestId}/reject`
+}
+
+/**
+ * @summary Reject a submitted issue request
+ */
+export const rejectIssueRequest = async (requestId: number,
+    issueRequestRejectionInput: IssueRequestRejectionInput, options?: Parameters<typeof customFetch>[1]): Promise<IssueRequest> => {
+
+  return customFetch<IssueRequest>(getRejectIssueRequestUrl(requestId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(issueRequestRejectionInput)
+  }
+);}
+
+
+
+
+
+export const getRejectIssueRequestMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rejectIssueRequest>>, TError,{requestId: number;data: BodyType<IssueRequestRejectionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof rejectIssueRequest>>, TError,{requestId: number;data: BodyType<IssueRequestRejectionInput>}, TContext> => {
+
+const mutationKey = ['rejectIssueRequest'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rejectIssueRequest>>, {requestId: number;data: BodyType<IssueRequestRejectionInput>}> = (props) => {
+          const {requestId,data} = props ?? {};
+
+          return  rejectIssueRequest(requestId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RejectIssueRequestMutationResult = NonNullable<Awaited<ReturnType<typeof rejectIssueRequest>>>
+    export type RejectIssueRequestMutationBody = BodyType<IssueRequestRejectionInput>
+    export type RejectIssueRequestMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Reject a submitted issue request
+ */
+export const useRejectIssueRequest = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rejectIssueRequest>>, TError,{requestId: number;data: BodyType<IssueRequestRejectionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof rejectIssueRequest>>,
+        TError,
+        {requestId: number;data: BodyType<IssueRequestRejectionInput>},
+        TContext
+      > => {
+      return useMutation(getRejectIssueRequestMutationOptions(options));
+    }
+
+export const getGetIssueRequestPreviewUrl = (requestId: number,) => {
+
+
+
+
+  return `/api/issue-requests/${requestId}/issue-preview`
+}
+
+/**
+ * @summary Preview availability for an approved issue request
+ */
+export const getIssueRequestPreview = async (requestId: number, options?: Parameters<typeof customFetch>[1]): Promise<IssueRequestPreview> => {
+
+  return customFetch<IssueRequestPreview>(getGetIssueRequestPreviewUrl(requestId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIssueRequestPreviewQueryKey = (requestId: number,) => {
+    return [
+    `/api/issue-requests/${requestId}/issue-preview`
+    ] as const;
+    }
+
+
+export const getGetIssueRequestPreviewQueryOptions = <TData = Awaited<ReturnType<typeof getIssueRequestPreview>>, TError = ErrorType<ErrorResponse>>(requestId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIssueRequestPreview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIssueRequestPreviewQueryKey(requestId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIssueRequestPreview>>> = ({ signal }) => getIssueRequestPreview(requestId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: requestId !== null && requestId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIssueRequestPreview>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIssueRequestPreviewQueryResult = NonNullable<Awaited<ReturnType<typeof getIssueRequestPreview>>>
+export type GetIssueRequestPreviewQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Preview availability for an approved issue request
+ */
+
+export function useGetIssueRequestPreview<TData = Awaited<ReturnType<typeof getIssueRequestPreview>>, TError = ErrorType<ErrorResponse>>(
+ requestId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIssueRequestPreview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIssueRequestPreviewQueryOptions(requestId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getIssueRequestUrl = (requestId: number,) => {
+
+
+
+
+  return `/api/issue-requests/${requestId}/issue`
+}
+
+/**
+ * @summary Issue an approved request and create a voucher
+ */
+export const issueRequest = async (requestId: number,
+    issueRequestIssueInput: IssueRequestIssueInput, options?: Parameters<typeof customFetch>[1]): Promise<IssueVoucher> => {
+
+  return customFetch<IssueVoucher>(getIssueRequestUrl(requestId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(issueRequestIssueInput)
+  }
+);}
+
+
+
+
+
+export const getIssueRequestMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof issueRequest>>, TError,{requestId: number;data: BodyType<IssueRequestIssueInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof issueRequest>>, TError,{requestId: number;data: BodyType<IssueRequestIssueInput>}, TContext> => {
+
+const mutationKey = ['issueRequest'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof issueRequest>>, {requestId: number;data: BodyType<IssueRequestIssueInput>}> = (props) => {
+          const {requestId,data} = props ?? {};
+
+          return  issueRequest(requestId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type IssueRequestMutationResult = NonNullable<Awaited<ReturnType<typeof issueRequest>>>
+    export type IssueRequestMutationBody = BodyType<IssueRequestIssueInput>
+    export type IssueRequestMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Issue an approved request and create a voucher
+ */
+export const useIssueRequest = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof issueRequest>>, TError,{requestId: number;data: BodyType<IssueRequestIssueInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof issueRequest>>,
+        TError,
+        {requestId: number;data: BodyType<IssueRequestIssueInput>},
+        TContext
+      > => {
+      return useMutation(getIssueRequestMutationOptions(options));
+    }
+
+export const getCloseIssueRequestUrl = (requestId: number,) => {
+
+
+
+
+  return `/api/issue-requests/${requestId}/close`
+}
+
+/**
+ * @summary Close an issued request
+ */
+export const closeIssueRequest = async (requestId: number, options?: Parameters<typeof customFetch>[1]): Promise<IssueRequest> => {
+
+  return customFetch<IssueRequest>(getCloseIssueRequestUrl(requestId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCloseIssueRequestMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof closeIssueRequest>>, TError,{requestId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof closeIssueRequest>>, TError,{requestId: number}, TContext> => {
+
+const mutationKey = ['closeIssueRequest'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof closeIssueRequest>>, {requestId: number}> = (props) => {
+          const {requestId} = props ?? {};
+
+          return  closeIssueRequest(requestId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CloseIssueRequestMutationResult = NonNullable<Awaited<ReturnType<typeof closeIssueRequest>>>
+
+    export type CloseIssueRequestMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Close an issued request
+ */
+export const useCloseIssueRequest = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof closeIssueRequest>>, TError,{requestId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof closeIssueRequest>>,
+        TError,
+        {requestId: number},
+        TContext
+      > => {
+      return useMutation(getCloseIssueRequestMutationOptions(options));
+    }
+
+export const getListIssueVouchersUrl = () => {
+
+
+
+
+  return `/api/issue-vouchers`
+}
+
+/**
+ * @summary List issue vouchers
+ */
+export const listIssueVouchers = async ( options?: Parameters<typeof customFetch>[1]): Promise<IssueVoucher[]> => {
+
+  return customFetch<IssueVoucher[]>(getListIssueVouchersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListIssueVouchersQueryKey = () => {
+    return [
+    `/api/issue-vouchers`
+    ] as const;
+    }
+
+
+export const getListIssueVouchersQueryOptions = <TData = Awaited<ReturnType<typeof listIssueVouchers>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listIssueVouchers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListIssueVouchersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listIssueVouchers>>> = ({ signal }) => listIssueVouchers({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listIssueVouchers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListIssueVouchersQueryResult = NonNullable<Awaited<ReturnType<typeof listIssueVouchers>>>
+export type ListIssueVouchersQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List issue vouchers
+ */
+
+export function useListIssueVouchers<TData = Awaited<ReturnType<typeof listIssueVouchers>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listIssueVouchers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListIssueVouchersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetIssueVoucherUrl = (voucherId: number,) => {
+
+
+
+
+  return `/api/issue-vouchers/${voucherId}`
+}
+
+/**
+ * @summary Get an issue voucher
+ */
+export const getIssueVoucher = async (voucherId: number, options?: Parameters<typeof customFetch>[1]): Promise<IssueVoucher> => {
+
+  return customFetch<IssueVoucher>(getGetIssueVoucherUrl(voucherId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetIssueVoucherQueryKey = (voucherId: number,) => {
+    return [
+    `/api/issue-vouchers/${voucherId}`
+    ] as const;
+    }
+
+
+export const getGetIssueVoucherQueryOptions = <TData = Awaited<ReturnType<typeof getIssueVoucher>>, TError = ErrorType<ErrorResponse>>(voucherId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIssueVoucher>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetIssueVoucherQueryKey(voucherId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getIssueVoucher>>> = ({ signal }) => getIssueVoucher(voucherId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: voucherId !== null && voucherId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getIssueVoucher>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetIssueVoucherQueryResult = NonNullable<Awaited<ReturnType<typeof getIssueVoucher>>>
+export type GetIssueVoucherQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get an issue voucher
+ */
+
+export function useGetIssueVoucher<TData = Awaited<ReturnType<typeof getIssueVoucher>>, TError = ErrorType<ErrorResponse>>(
+ voucherId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getIssueVoucher>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetIssueVoucherQueryOptions(voucherId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 

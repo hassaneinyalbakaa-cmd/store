@@ -1,5 +1,7 @@
 from .models import (
     Department,
+    IssueRequest,
+    IssueVoucher,
     InventoryMovement,
     Item,
     Receipt,
@@ -16,6 +18,9 @@ from .schemas import (
     InventoryBalance as InventoryBalanceSchema,
     InventoryExpiry as InventoryExpirySchema,
     InventoryMovement as InventoryMovementSchema,
+    IssueRequest as IssueRequestSchema,
+    IssueRequestPreview as IssueRequestPreviewSchema,
+    IssueVoucher as IssueVoucherSchema,
     Receipt as ReceiptSchema,
     ReceiptDetail as ReceiptDetailSchema,
     SessionUser,
@@ -186,4 +191,82 @@ def to_inventory_expiry(row: tuple, days_remaining: int, bucket: str) -> Invento
         quantity=quantity,
         days_remaining=days_remaining,
         bucket=bucket,
+    )
+
+
+def to_issue_request(
+    request: IssueRequest,
+    current_balance: float,
+    available_quantity: float,
+) -> IssueRequestSchema:
+    voucher = request.issue_voucher
+    return IssueRequestSchema(
+        id=request.id,
+        request_number=request.request_number,
+        department_id=request.department_id,
+        department_name=request.department.name,
+        request_date=request.request_date,
+        reason=request.reason,
+        item_id=request.item_id,
+        item_code=request.item.code,
+        item_name=request.item.name,
+        item_unit=request.item.unit,
+        warehouse_id=request.item.warehouse_id,
+        warehouse_name=request.item.warehouse.name,
+        quantity=request.quantity,
+        current_balance=current_balance,
+        available_quantity=available_quantity,
+        notes=request.notes,
+        status=request.status,
+        rejection_reason=request.rejection_reason,
+        created_by_id=request.created_by_id,
+        created_by_name=request.created_by.display_name,
+        issue_voucher_id=voucher.id if voucher else None,
+        issue_number=voucher.issue_number if voucher else None,
+        created_at=request.created_at,
+    )
+
+
+def to_issue_request_preview(
+    request: IssueRequest,
+    current_balance: float,
+    available_quantity: float,
+    available_serial_numbers: list[str],
+) -> IssueRequestPreviewSchema:
+    return IssueRequestPreviewSchema(
+        request_id=request.id,
+        request_number=request.request_number,
+        item_id=request.item_id,
+        item_name=request.item.name,
+        item_unit=request.item.unit,
+        warehouse_id=request.item.warehouse_id,
+        warehouse_name=request.item.warehouse.name,
+        requested_quantity=request.quantity,
+        current_balance=current_balance,
+        available_quantity=available_quantity,
+        requires_serial_number=request.item.requires_serial_number,
+        available_serial_numbers=available_serial_numbers,
+    )
+
+
+def to_issue_voucher(voucher: IssueVoucher) -> IssueVoucherSchema:
+    request = voucher.request
+    return IssueVoucherSchema(
+        id=voucher.id,
+        issue_number=voucher.issue_number,
+        request_id=voucher.request_id,
+        request_number=request.request_number,
+        department_id=request.department_id,
+        department_name=request.department.name,
+        item_id=voucher.item_id,
+        item_code=voucher.item.code,
+        item_name=voucher.item.name,
+        item_unit=voucher.item.unit,
+        warehouse_id=voucher.warehouse_id,
+        warehouse_name=voucher.warehouse.name,
+        quantity=voucher.quantity,
+        serial_numbers=[serial.serial_number for serial in voucher.serials],
+        issued_by_id=voucher.issued_by_id,
+        issued_by_name=voucher.issued_by.display_name,
+        issued_at=voucher.issued_at,
     )

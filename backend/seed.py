@@ -23,6 +23,10 @@ PERMISSIONS = [
     ("receipts:write", "إنشاء سندات الاستلام", "إنشاء سندات الاستلام وإضافة المخزون"),
     ("inventory:read", "عرض المخزون", "عرض الأرصدة وحركات المخزون والصلاحية"),
     ("inventory:write", "إدارة المخزون", "إضافة الأرصدة الافتتاحية"),
+    ("issue_requests:read", "عرض طلبات الصرف", "عرض طلبات الصرف ومتابعة حالاتها"),
+    ("issue_requests:write", "إنشاء طلبات الصرف", "إنشاء وإرسال طلبات الصرف"),
+    ("issues:read", "عرض سندات الصرف", "عرض سندات الصرف المنفذة"),
+    ("issues:write", "إدارة الصرف", "اعتماد ورفض وتنفيذ وإغلاق طلبات الصرف"),
 ]
 
 ROLES = [
@@ -45,6 +49,10 @@ ROLES = [
             "receipts:write",
             "inventory:read",
             "inventory:write",
+            "issue_requests:read",
+            "issue_requests:write",
+            "issues:read",
+            "issues:write",
         ],
     ),
     (
@@ -63,13 +71,17 @@ ROLES = [
             "receipts:write",
             "inventory:read",
             "inventory:write",
+            "issue_requests:read",
+            "issue_requests:write",
+            "issues:read",
+            "issues:write",
         ],
     ),
     (
         "department_employee",
         "موظف القسم",
         "الوصول الأساسي إلى النظام",
-        ["dashboard:read"],
+        ["dashboard:read", "issue_requests:read", "issue_requests:write"],
     ),
 ]
 

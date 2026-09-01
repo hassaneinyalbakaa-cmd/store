@@ -584,7 +584,7 @@ export const GetReceiptResponse = zod.object({
  */
 export const ListInventoryMovementsResponseItem = zod.object({
   "id": zod.number(),
-  "movement_type": zod.enum(['opening', 'receipt']),
+  "movement_type": zod.enum(['opening', 'receipt', 'issue']),
   "movement_date": zod.coerce.date(),
   "item_id": zod.number(),
   "item_code": zod.string(),
@@ -689,7 +689,7 @@ export const CreateOpeningBalanceBody = zod.object({
 
 export const CreateOpeningBalanceResponse = zod.object({
   "id": zod.number(),
-  "movement_type": zod.enum(['opening', 'receipt']),
+  "movement_type": zod.enum(['opening', 'receipt', 'issue']),
   "movement_date": zod.coerce.date(),
   "item_id": zod.number(),
   "item_code": zod.string(),
@@ -709,6 +709,366 @@ export const CreateOpeningBalanceResponse = zod.object({
   "receipt_number": zod.string().nullable(),
   "notes": zod.string(),
   "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary List issue requests
+ */
+export const ListIssueRequestsResponseItem = zod.object({
+  "id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "request_date": zod.coerce.date(),
+  "reason": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "current_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'approved', 'rejected', 'issued', 'closed']),
+  "rejection_reason": zod.string().nullable(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "issue_voucher_id": zod.number().nullable(),
+  "issue_number": zod.string().nullable(),
+  "created_at": zod.coerce.date()
+})
+export const ListIssueRequestsResponse = zod.array(ListIssueRequestsResponseItem)
+
+
+/**
+ * @summary Create a draft issue request
+ */
+
+export const createIssueRequestBodyQuantityExclusiveMin = 0;
+
+
+
+export const CreateIssueRequestBody = zod.object({
+  "department_id": zod.number(),
+  "request_date": zod.coerce.date(),
+  "reason": zod.string().min(1),
+  "item_id": zod.number(),
+  "quantity": zod.number().gt(createIssueRequestBodyQuantityExclusiveMin),
+  "notes": zod.string().optional()
+})
+
+export const CreateIssueRequestResponse = zod.object({
+  "id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "request_date": zod.coerce.date(),
+  "reason": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "current_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'approved', 'rejected', 'issued', 'closed']),
+  "rejection_reason": zod.string().nullable(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "issue_voucher_id": zod.number().nullable(),
+  "issue_number": zod.string().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get an issue request
+ */
+export const GetIssueRequestParams = zod.object({
+  "requestId": zod.coerce.number()
+})
+
+export const GetIssueRequestResponse = zod.object({
+  "id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "request_date": zod.coerce.date(),
+  "reason": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "current_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'approved', 'rejected', 'issued', 'closed']),
+  "rejection_reason": zod.string().nullable(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "issue_voucher_id": zod.number().nullable(),
+  "issue_number": zod.string().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Submit a draft issue request
+ */
+export const SubmitIssueRequestParams = zod.object({
+  "requestId": zod.coerce.number()
+})
+
+export const SubmitIssueRequestResponse = zod.object({
+  "id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "request_date": zod.coerce.date(),
+  "reason": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "current_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'approved', 'rejected', 'issued', 'closed']),
+  "rejection_reason": zod.string().nullable(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "issue_voucher_id": zod.number().nullable(),
+  "issue_number": zod.string().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Approve a submitted issue request
+ */
+export const ApproveIssueRequestParams = zod.object({
+  "requestId": zod.coerce.number()
+})
+
+export const ApproveIssueRequestResponse = zod.object({
+  "id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "request_date": zod.coerce.date(),
+  "reason": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "current_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'approved', 'rejected', 'issued', 'closed']),
+  "rejection_reason": zod.string().nullable(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "issue_voucher_id": zod.number().nullable(),
+  "issue_number": zod.string().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Reject a submitted issue request
+ */
+export const RejectIssueRequestParams = zod.object({
+  "requestId": zod.coerce.number()
+})
+
+
+
+
+export const RejectIssueRequestBody = zod.object({
+  "rejection_reason": zod.string().min(1)
+})
+
+export const RejectIssueRequestResponse = zod.object({
+  "id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "request_date": zod.coerce.date(),
+  "reason": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "current_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'approved', 'rejected', 'issued', 'closed']),
+  "rejection_reason": zod.string().nullable(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "issue_voucher_id": zod.number().nullable(),
+  "issue_number": zod.string().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Preview availability for an approved issue request
+ */
+export const GetIssueRequestPreviewParams = zod.object({
+  "requestId": zod.coerce.number()
+})
+
+export const GetIssueRequestPreviewResponse = zod.object({
+  "request_id": zod.number(),
+  "request_number": zod.string(),
+  "item_id": zod.number(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "requested_quantity": zod.number(),
+  "current_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "requires_serial_number": zod.boolean(),
+  "available_serial_numbers": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Issue an approved request and create a voucher
+ */
+export const IssueRequestParams = zod.object({
+  "requestId": zod.coerce.number()
+})
+
+export const IssueRequestBody = zod.object({
+  "serial_numbers": zod.array(zod.string()).optional()
+})
+
+export const IssueRequestResponse = zod.object({
+  "id": zod.number(),
+  "issue_number": zod.string(),
+  "request_id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "serial_numbers": zod.array(zod.string()),
+  "issued_by_id": zod.number(),
+  "issued_by_name": zod.string(),
+  "issued_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Close an issued request
+ */
+export const CloseIssueRequestParams = zod.object({
+  "requestId": zod.coerce.number()
+})
+
+export const CloseIssueRequestResponse = zod.object({
+  "id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "request_date": zod.coerce.date(),
+  "reason": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "current_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'approved', 'rejected', 'issued', 'closed']),
+  "rejection_reason": zod.string().nullable(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "issue_voucher_id": zod.number().nullable(),
+  "issue_number": zod.string().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary List issue vouchers
+ */
+export const ListIssueVouchersResponseItem = zod.object({
+  "id": zod.number(),
+  "issue_number": zod.string(),
+  "request_id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "serial_numbers": zod.array(zod.string()),
+  "issued_by_id": zod.number(),
+  "issued_by_name": zod.string(),
+  "issued_at": zod.coerce.date()
+})
+export const ListIssueVouchersResponse = zod.array(ListIssueVouchersResponseItem)
+
+
+/**
+ * @summary Get an issue voucher
+ */
+export const GetIssueVoucherParams = zod.object({
+  "voucherId": zod.coerce.number()
+})
+
+export const GetIssueVoucherResponse = zod.object({
+  "id": zod.number(),
+  "issue_number": zod.string(),
+  "request_id": zod.number(),
+  "request_number": zod.string(),
+  "department_id": zod.number(),
+  "department_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "serial_numbers": zod.array(zod.string()),
+  "issued_by_id": zod.number(),
+  "issued_by_name": zod.string(),
+  "issued_at": zod.coerce.date()
 })
 
 

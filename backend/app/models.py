@@ -214,6 +214,9 @@ class InventoryMovement(Base):
     receipt_detail_id: Mapped[int | None] = mapped_column(
         ForeignKey("receipt_details.id"), nullable=True, unique=True
     )
+    issue_voucher_id: Mapped[int | None] = mapped_column(
+        ForeignKey("issue_vouchers.id"), nullable=True, unique=True
+    )
     notes: Mapped[str] = mapped_column(String(500), default="")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -222,6 +225,9 @@ class InventoryMovement(Base):
     warehouse: Mapped[Warehouse] = relationship(lazy="selectin")
     storage_location: Mapped[StorageLocation | None] = relationship(lazy="selectin")
     receipt_detail: Mapped[ReceiptDetail | None] = relationship(back_populates="movement")
+    issue_voucher: Mapped["IssueVoucher | None"] = relationship(
+        back_populates="movement"
+    )
     serials: Mapped[list["InventorySerial"]] = relationship(
         back_populates="movement", cascade="all, delete-orphan", lazy="selectin"
     )
@@ -244,7 +250,72 @@ class InventorySerial(Base):
         ForeignKey("receipt_details.id", ondelete="CASCADE"), nullable=True, index=True
     )
     expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    is_available: Mapped[bool] = mapped_column(
+        Boolean, default=True, server_default="true", index=True
+    )
+    issue_voucher_id: Mapped[int | None] = mapped_column(
+        ForeignKey("issue_vouchers.id"), nullable=True, index=True
+    )
     movement: Mapped[InventoryMovement] = relationship(back_populates="serials")
     receipt_detail: Mapped[ReceiptDetail | None] = relationship(
         back_populates="serials", foreign_keys=[receipt_detail_id]
+    )
+    issue_voucher: Mapped["IssueVoucher | None"] = relationship(
+        back_populates="serials", foreign_keys=[issue_voucher_id]
+    )
+
+
+class IssueRequest(Base):
+    __tablename__ = "issue_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    request_number: Mapped[str] = mapped_column(String(40), unique=True)
+    department_id: Mapped[int] = mapped_column(
+        ForeignKey("departments.id"), index=True
+    )
+    request_date: Mapped[date] = mapped_column(Date, nullable=False)
+    reason: Mapped[str] = mapped_column(String(255))
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id"), index=True)
+    quantity: Mapped[float] = mapped_column(Float)
+    notes: Mapped[str] = mapped_column(String(500), default="")
+    status: Mapped[str] = mapped_column(
+        String(20), default="draft", server_default="draft", index=True
+    )
+    rejection_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    department: Mapped[Department] = relationship(lazy="selectin")
+    item: Mapped[Item] = relationship(lazy="selectin")
+    created_by: Mapped[User] = relationship(lazy="selectin")
+    issue_voucher: Mapped["IssueVoucher | None"] = relationship(
+        back_populates="request", uselist=False
+    )
+
+
+class IssueVoucher(Base):
+    __tablename__ = "issue_vouchers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    issue_number: Mapped[str] = mapped_column(String(40), unique=True)
+    request_id: Mapped[int] = mapped_column(
+        ForeignKey("issue_requests.id"), unique=True
+    )
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id"), index=True)
+    warehouse_id: Mapped[int] = mapped_column(ForeignKey("warehouses.id"), index=True)
+    quantity: Mapped[float] = mapped_column(Float)
+    issued_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    issued_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    request: Mapped[IssueRequest] = relationship(back_populates="issue_voucher")
+    item: Mapped[Item] = relationship(lazy="selectin")
+    warehouse: Mapped[Warehouse] = relationship(lazy="selectin")
+    issued_by: Mapped[User] = relationship(lazy="selectin")
+    movement: Mapped[InventoryMovement | None] = relationship(
+        back_populates="issue_voucher", uselist=False
+    )
+    serials: Mapped[list[InventorySerial]] = relationship(
+        back_populates="issue_voucher"
     )

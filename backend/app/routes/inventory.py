@@ -328,6 +328,7 @@ async def list_inventory_expiry(
             StorageLocation.id == InventoryMovement.storage_location_id,
         )
         .where(
+            Item.requires_serial_number.is_(False),
             InventoryMovement.expiry_date.is_not(None),
             InventoryMovement.expiry_date <= horizon,
         )
@@ -347,6 +348,48 @@ async def list_inventory_expiry(
         else:
             bucket = "within_90"
         rows.append(to_inventory_expiry(row, days_remaining, bucket))
+
+    serial_result = await db.execute(
+        select(
+            Item,
+            Warehouse,
+            StorageLocation,
+            InventorySerial.expiry_date,
+            func.count(InventorySerial.id),
+        )
+        .join(Item, Item.id == InventorySerial.item_id)
+        .join(Warehouse, Warehouse.id == InventorySerial.warehouse_id)
+        .outerjoin(
+            StorageLocation,
+            StorageLocation.id == InventorySerial.storage_location_id,
+        )
+        .where(
+            Item.requires_serial_number.is_(True),
+            InventorySerial.is_available.is_(True),
+            InventorySerial.expiry_date.is_not(None),
+            InventorySerial.expiry_date <= horizon,
+        )
+        .group_by(
+            Item.id,
+            Warehouse.id,
+            StorageLocation.id,
+            InventorySerial.expiry_date,
+        )
+        .order_by(InventorySerial.expiry_date, Item.code)
+    )
+    for row in serial_result.all():
+        expiry_date = row[3]
+        days_remaining = (expiry_date - today).days
+        if days_remaining < 0:
+            bucket = "expired"
+        elif days_remaining <= 30:
+            bucket = "within_30"
+        elif days_remaining <= 60:
+            bucket = "within_60"
+        else:
+            bucket = "within_90"
+        rows.append(to_inventory_expiry(row, days_remaining, bucket))
+    rows.sort(key=lambda row: (row.expiry_date, row.item_code))
     return rows
 
 

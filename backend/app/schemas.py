@@ -214,7 +214,7 @@ class ReceiptDetailInput(BaseModel):
     warehouse_id: int
     storage_location: StorageLocationInput | None = None
     expiry_date: date | None = None
-    serial_numbers: list[str] = []
+    serial_numbers: list[str] = Field(default_factory=list)
 
 
 class ReceiptInput(BaseModel):
@@ -273,5 +273,83 @@ class OpeningBalanceInput(BaseModel):
     warehouse_id: int
     storage_location: StorageLocationInput | None = None
     expiry_date: date | None = None
-    serial_numbers: list[str] = []
+    serial_numbers: list[str] = Field(default_factory=list)
     notes: str = Field(default="", max_length=500)
+
+
+class IssueRequest(BaseModel):
+    id: int
+    request_number: str
+    department_id: int
+    department_name: str
+    request_date: date
+    reason: str
+    item_id: int
+    item_code: str
+    item_name: str
+    item_unit: str
+    warehouse_id: int
+    warehouse_name: str
+    quantity: float
+    current_balance: float
+    available_quantity: float
+    notes: str
+    status: str
+    rejection_reason: str | None
+    created_by_id: int
+    created_by_name: str
+    issue_voucher_id: int | None
+    issue_number: str | None
+    created_at: datetime
+
+
+class IssueRequestInput(BaseModel):
+    department_id: int
+    request_date: date
+    reason: str = Field(min_length=1, max_length=255)
+    item_id: int
+    quantity: float = Field(gt=0)
+    notes: str = Field(default="", max_length=500)
+
+
+class IssueRequestRejectionInput(BaseModel):
+    rejection_reason: str = Field(min_length=1, max_length=500)
+
+
+class IssueRequestIssueInput(BaseModel):
+    serial_numbers: list[str] = Field(default_factory=list)
+
+
+class IssueRequestPreview(BaseModel):
+    request_id: int
+    request_number: str
+    item_id: int
+    item_name: str
+    item_unit: str
+    warehouse_id: int
+    warehouse_name: str
+    requested_quantity: float
+    current_balance: float
+    available_quantity: float
+    requires_serial_number: bool
+    available_serial_numbers: list[str]
+
+
+class IssueVoucher(BaseModel):
+    id: int
+    issue_number: str
+    request_id: int
+    request_number: str
+    department_id: int
+    department_name: str
+    item_id: int
+    item_code: str
+    item_name: str
+    item_unit: str
+    warehouse_id: int
+    warehouse_name: str
+    quantity: float
+    serial_numbers: list[str]
+    issued_by_id: int
+    issued_by_name: str
+    issued_at: datetime

@@ -19,6 +19,8 @@ import UsersPage from '@/pages/users';
 import WarehousesPage from '@/pages/warehouses';
 import ReceiptsPage from '@/pages/receipts';
 import InventoryPage from '@/pages/inventory';
+import IssueRequestsPage from '@/pages/issue-requests';
+import IssueVouchersPage from '@/pages/issue-vouchers';
 import NotFound from '@/pages/not-found';
 import {
   Route,
@@ -55,6 +57,9 @@ function Router({ user }: { user: SessionUser | null }) {
         <Route path="/items">{() => user ? <Protected user={user} permission="items:read"><ItemsPage /></Protected> : <LoginPage />}</Route>
         <Route path="/receipts">{() => user ? <Protected user={user} permission="receipts:read"><ReceiptsPage canWrite={user.permissions.includes('receipts:write')} /></Protected> : <LoginPage />}</Route>
         <Route path="/inventory">{() => user ? <Protected user={user} permission="inventory:read"><InventoryPage canWrite={user.permissions.includes('inventory:write')} /></Protected> : <LoginPage />}</Route>
+        <Route path="/issue-requests">{() => user ? <Protected user={user} permission="issue_requests:read"><IssueRequestsPage user={user} /></Protected> : <LoginPage />}</Route>
+        <Route path="/issue-vouchers">{() => user ? <Protected user={user} permission="issues:read"><IssueVouchersPage /></Protected> : <LoginPage />}</Route>
+        <Route path="/issue-vouchers/:id">{() => user ? <Protected user={user} permission="issues:read"><IssueVouchersPage /></Protected> : <LoginPage />}</Route>
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>
