@@ -19,6 +19,10 @@ PERMISSIONS = [
     ("departments:write", "إدارة الأقسام", "إنشاء وتعديل الأقسام"),
     ("items:read", "عرض الأصناف", "عرض والبحث في دليل الأصناف"),
     ("items:write", "إدارة الأصناف", "إنشاء وتعديل وتعطيل الأصناف"),
+    ("receipts:read", "عرض سندات الاستلام", "عرض سجل سندات الاستلام"),
+    ("receipts:write", "إنشاء سندات الاستلام", "إنشاء سندات الاستلام وإضافة المخزون"),
+    ("inventory:read", "عرض المخزون", "عرض الأرصدة وحركات المخزون والصلاحية"),
+    ("inventory:write", "إدارة المخزون", "إضافة الأرصدة الافتتاحية"),
 ]
 
 ROLES = [
@@ -37,6 +41,10 @@ ROLES = [
             "departments:write",
             "items:read",
             "items:write",
+            "receipts:read",
+            "receipts:write",
+            "inventory:read",
+            "inventory:write",
         ],
     ),
     (
@@ -51,6 +59,10 @@ ROLES = [
             "departments:read",
             "items:read",
             "items:write",
+            "receipts:read",
+            "receipts:write",
+            "inventory:read",
+            "inventory:write",
         ],
     ),
     (

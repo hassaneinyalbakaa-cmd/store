@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -182,3 +182,96 @@ class ItemUpdate(BaseModel):
     requires_serial_number: bool | None = None
     requires_expiry_date: bool | None = None
     is_active: bool | None = None
+
+
+class ReceiptDetail(BaseModel):
+    id: int
+    item_id: int
+    item_code: str
+    item_name: str
+    quantity: float
+    warehouse_id: int
+    warehouse_name: str
+    storage_location: StorageLocation | None
+    expiry_date: date | None
+    serial_numbers: list[str]
+
+
+class Receipt(BaseModel):
+    id: int
+    receipt_number: str
+    receipt_date: date
+    supplier: str
+    document_number: str
+    notes: str
+    details: list[ReceiptDetail]
+    created_at: datetime
+
+
+class ReceiptDetailInput(BaseModel):
+    item_id: int
+    quantity: float = Field(gt=0)
+    warehouse_id: int
+    storage_location: StorageLocationInput | None = None
+    expiry_date: date | None = None
+    serial_numbers: list[str] = []
+
+
+class ReceiptInput(BaseModel):
+    receipt_date: date
+    supplier: str = Field(min_length=1, max_length=160)
+    document_number: str = Field(default="", max_length=80)
+    notes: str = Field(default="", max_length=500)
+    details: list[ReceiptDetailInput] = Field(min_length=1)
+
+
+class InventoryMovement(BaseModel):
+    id: int
+    movement_type: str
+    movement_date: date
+    item_id: int
+    item_code: str
+    item_name: str
+    warehouse_id: int
+    warehouse_name: str
+    storage_location: StorageLocation | None
+    quantity: float
+    expiry_date: date | None
+    receipt_id: int | None
+    receipt_number: str | None
+    notes: str
+    created_at: datetime
+
+
+class InventoryBalance(BaseModel):
+    item_id: int
+    item_code: str
+    item_name: str
+    warehouse_id: int
+    warehouse_name: str
+    storage_location: StorageLocation | None
+    quantity: float
+
+
+class InventoryExpiry(BaseModel):
+    item_id: int
+    item_code: str
+    item_name: str
+    warehouse_id: int
+    warehouse_name: str
+    storage_location: StorageLocation | None
+    expiry_date: date
+    quantity: float
+    days_remaining: int
+    bucket: str
+
+
+class OpeningBalanceInput(BaseModel):
+    movement_date: date
+    item_id: int
+    quantity: float = Field(gt=0)
+    warehouse_id: int
+    storage_location: StorageLocationInput | None = None
+    expiry_date: date | None = None
+    serial_numbers: list[str] = []
+    notes: str = Field(default="", max_length=500)

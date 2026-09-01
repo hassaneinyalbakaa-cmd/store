@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, String, Table, Column, UniqueConstraint, func
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, String, Table, Column, UniqueConstraint, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -152,4 +152,99 @@ class Item(Base):
     warehouse: Mapped[Warehouse] = relationship(back_populates="items", lazy="selectin")
     storage_location: Mapped[StorageLocation | None] = relationship(
         back_populates="items", lazy="selectin"
+    )
+
+
+class Receipt(Base):
+    __tablename__ = "receipts"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    receipt_number: Mapped[str] = mapped_column(String(40), unique=True)
+    receipt_date: Mapped[date] = mapped_column(Date, nullable=False)
+    supplier: Mapped[str] = mapped_column(String(160))
+    document_number: Mapped[str] = mapped_column(String(80), default="")
+    notes: Mapped[str] = mapped_column(String(500), default="")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    details: Mapped[list["ReceiptDetail"]] = relationship(
+        back_populates="receipt", cascade="all, delete-orphan", lazy="selectin"
+    )
+
+
+class ReceiptDetail(Base):
+    __tablename__ = "receipt_details"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    receipt_id: Mapped[int] = mapped_column(
+        ForeignKey("receipts.id", ondelete="CASCADE"), index=True
+    )
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id"), index=True)
+    warehouse_id: Mapped[int] = mapped_column(ForeignKey("warehouses.id"), index=True)
+    storage_location_id: Mapped[int | None] = mapped_column(
+        ForeignKey("storage_locations.id"), nullable=True, index=True
+    )
+    quantity: Mapped[float] = mapped_column(Float)
+    expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    receipt: Mapped[Receipt] = relationship(back_populates="details")
+    item: Mapped[Item] = relationship(lazy="selectin")
+    warehouse: Mapped[Warehouse] = relationship(lazy="selectin")
+    storage_location: Mapped[StorageLocation | None] = relationship(lazy="selectin")
+    serials: Mapped[list["InventorySerial"]] = relationship(
+        back_populates="receipt_detail", cascade="all, delete-orphan", lazy="selectin"
+    )
+    movement: Mapped["InventoryMovement"] = relationship(
+        back_populates="receipt_detail", uselist=False, cascade="all, delete-orphan"
+    )
+
+
+class InventoryMovement(Base):
+    __tablename__ = "inventory_movements"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    movement_type: Mapped[str] = mapped_column(String(20), index=True)
+    movement_date: Mapped[date] = mapped_column(Date, nullable=False)
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id"), index=True)
+    warehouse_id: Mapped[int] = mapped_column(ForeignKey("warehouses.id"), index=True)
+    storage_location_id: Mapped[int | None] = mapped_column(
+        ForeignKey("storage_locations.id"), nullable=True, index=True
+    )
+    quantity: Mapped[float] = mapped_column(Float)
+    expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    receipt_detail_id: Mapped[int | None] = mapped_column(
+        ForeignKey("receipt_details.id"), nullable=True, unique=True
+    )
+    notes: Mapped[str] = mapped_column(String(500), default="")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    item: Mapped[Item] = relationship(lazy="selectin")
+    warehouse: Mapped[Warehouse] = relationship(lazy="selectin")
+    storage_location: Mapped[StorageLocation | None] = relationship(lazy="selectin")
+    receipt_detail: Mapped[ReceiptDetail | None] = relationship(back_populates="movement")
+    serials: Mapped[list["InventorySerial"]] = relationship(
+        back_populates="movement", cascade="all, delete-orphan", lazy="selectin"
+    )
+
+
+class InventorySerial(Base):
+    __tablename__ = "inventory_serials"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    serial_number: Mapped[str] = mapped_column(String(160), unique=True)
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id"), index=True)
+    warehouse_id: Mapped[int] = mapped_column(ForeignKey("warehouses.id"), index=True)
+    storage_location_id: Mapped[int | None] = mapped_column(
+        ForeignKey("storage_locations.id"), nullable=True, index=True
+    )
+    movement_id: Mapped[int] = mapped_column(
+        ForeignKey("inventory_movements.id", ondelete="CASCADE"), index=True
+    )
+    receipt_detail_id: Mapped[int | None] = mapped_column(
+        ForeignKey("receipt_details.id", ondelete="CASCADE"), nullable=True, index=True
+    )
+    expiry_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    movement: Mapped[InventoryMovement] = relationship(back_populates="serials")
+    receipt_detail: Mapped[ReceiptDetail | None] = relationship(
+        back_populates="serials", foreign_keys=[receipt_detail_id]
     )

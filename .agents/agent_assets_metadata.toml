@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "ilThwCXfMNQ5of4jA-B55"
+uri = "file://screenshots/phase3-warehouse-login.jpg"
+type = "image"
+title = "معاينة واجهة نظام إدارة المخزن"
+description = "لقطة معاينة للواجهة بعد اكتمال Phase 3 وتشغيل الواجهة والخدمات."
+logical_id = "6878bc6c-0ebe-417c-a3cb-6796227f1c83"
+content_hash = "sha256:19f5b4bf8ac0325d2408b30eb829f53e57720c6363f6a820362e35eae654fb40"
+size = 47938
+mtime_ms = 1788245025075
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:15af4883-f8ca-4058-805a-92b5fb873597/6878bc6c-0ebe-417c-a3cb-6796227f1c83/6758df99-123a-454c-aef6-c9c0195e2755"
+storage_version_token = "1788245049991716"
+content_type = "image/jpeg"

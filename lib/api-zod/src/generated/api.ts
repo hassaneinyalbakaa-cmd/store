@@ -450,3 +450,265 @@ export const UpdateItemResponse = zod.object({
 })
 
 
+/**
+ * @summary List receipt notes
+ */
+export const ListReceiptsResponseItem = zod.object({
+  "id": zod.number(),
+  "receipt_number": zod.string(),
+  "receipt_date": zod.coerce.date(),
+  "supplier": zod.string(),
+  "document_number": zod.string(),
+  "notes": zod.string(),
+  "details": zod.array(zod.object({
+  "id": zod.number(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "quantity": zod.number(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "expiry_date": zod.coerce.date().nullable(),
+  "serial_numbers": zod.array(zod.string())
+})),
+  "created_at": zod.coerce.date()
+})
+export const ListReceiptsResponse = zod.array(ListReceiptsResponseItem)
+
+
+/**
+ * @summary Create a goods receipt and inventory movements
+ */
+
+export const createReceiptBodyDetailsItemQuantityExclusiveMin = 0;
+
+
+
+
+
+
+
+export const CreateReceiptBody = zod.object({
+  "receipt_date": zod.coerce.date(),
+  "supplier": zod.string().min(1),
+  "document_number": zod.string().optional(),
+  "notes": zod.string().optional(),
+  "details": zod.array(zod.object({
+  "item_id": zod.number(),
+  "quantity": zod.number().gt(createReceiptBodyDetailsItemQuantityExclusiveMin),
+  "warehouse_id": zod.number(),
+  "storage_location": zod.union([zod.object({
+  "area": zod.string().min(1),
+  "shelf": zod.string().min(1),
+  "bin": zod.string().min(1)
+}),zod.null()]).optional(),
+  "expiry_date": zod.coerce.date().nullish(),
+  "serial_numbers": zod.array(zod.string()).optional()
+})).min(1)
+})
+
+export const CreateReceiptResponse = zod.object({
+  "id": zod.number(),
+  "receipt_number": zod.string(),
+  "receipt_date": zod.coerce.date(),
+  "supplier": zod.string(),
+  "document_number": zod.string(),
+  "notes": zod.string(),
+  "details": zod.array(zod.object({
+  "id": zod.number(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "quantity": zod.number(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "expiry_date": zod.coerce.date().nullable(),
+  "serial_numbers": zod.array(zod.string())
+})),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get a receipt note
+ */
+export const GetReceiptParams = zod.object({
+  "receiptId": zod.coerce.number()
+})
+
+export const GetReceiptResponse = zod.object({
+  "id": zod.number(),
+  "receipt_number": zod.string(),
+  "receipt_date": zod.coerce.date(),
+  "supplier": zod.string(),
+  "document_number": zod.string(),
+  "notes": zod.string(),
+  "details": zod.array(zod.object({
+  "id": zod.number(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "quantity": zod.number(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "expiry_date": zod.coerce.date().nullable(),
+  "serial_numbers": zod.array(zod.string())
+})),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary List inventory movements
+ */
+export const ListInventoryMovementsResponseItem = zod.object({
+  "id": zod.number(),
+  "movement_type": zod.enum(['opening', 'receipt']),
+  "movement_date": zod.coerce.date(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "quantity": zod.number(),
+  "expiry_date": zod.coerce.date().nullable(),
+  "receipt_id": zod.number().nullable(),
+  "receipt_number": zod.string().nullable(),
+  "notes": zod.string(),
+  "created_at": zod.coerce.date()
+})
+export const ListInventoryMovementsResponse = zod.array(ListInventoryMovementsResponseItem)
+
+
+/**
+ * @summary Calculate inventory balances from movements
+ */
+export const ListInventoryBalancesResponseItem = zod.object({
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "quantity": zod.number()
+})
+export const ListInventoryBalancesResponse = zod.array(ListInventoryBalancesResponseItem)
+
+
+/**
+ * @summary List expiring inventory
+ */
+export const listInventoryExpiryQueryWithinDaysMin = 0;
+export const listInventoryExpiryQueryWithinDaysMax = 90;
+
+
+
+export const ListInventoryExpiryQueryParams = zod.object({
+  "withinDays": zod.coerce.number().min(listInventoryExpiryQueryWithinDaysMin).max(listInventoryExpiryQueryWithinDaysMax).optional()
+})
+
+export const ListInventoryExpiryResponseItem = zod.object({
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "expiry_date": zod.coerce.date(),
+  "quantity": zod.number(),
+  "days_remaining": zod.number(),
+  "bucket": zod.enum(['expired', 'within_30', 'within_60', 'within_90'])
+})
+export const ListInventoryExpiryResponse = zod.array(ListInventoryExpiryResponseItem)
+
+
+/**
+ * @summary Create an opening balance movement
+ */
+export const createOpeningBalanceBodyQuantityExclusiveMin = 0;
+
+
+
+
+
+
+export const CreateOpeningBalanceBody = zod.object({
+  "movement_date": zod.coerce.date(),
+  "item_id": zod.number(),
+  "quantity": zod.number().gt(createOpeningBalanceBodyQuantityExclusiveMin),
+  "warehouse_id": zod.number(),
+  "storage_location": zod.union([zod.object({
+  "area": zod.string().min(1),
+  "shelf": zod.string().min(1),
+  "bin": zod.string().min(1)
+}),zod.null()]).optional(),
+  "expiry_date": zod.coerce.date().nullish(),
+  "serial_numbers": zod.array(zod.string()).optional(),
+  "notes": zod.string().optional()
+})
+
+export const CreateOpeningBalanceResponse = zod.object({
+  "id": zod.number(),
+  "movement_type": zod.enum(['opening', 'receipt']),
+  "movement_date": zod.coerce.date(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "storage_location": zod.union([zod.object({
+  "id": zod.number(),
+  "warehouse_id": zod.number(),
+  "area": zod.string(),
+  "shelf": zod.string(),
+  "bin": zod.string()
+}),zod.null()]),
+  "quantity": zod.number(),
+  "expiry_date": zod.coerce.date().nullable(),
+  "receipt_id": zod.number().nullable(),
+  "receipt_number": zod.string().nullable(),
+  "notes": zod.string(),
+  "created_at": zod.coerce.date()
+})
+
+

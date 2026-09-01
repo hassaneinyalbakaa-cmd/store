@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import get_settings
-from .routes import access, auth, catalog, dashboard, health, users
+from .routes import access, auth, catalog, dashboard, health, inventory, users
 
 
 @asynccontextmanager
@@ -34,3 +34,4 @@ app.include_router(dashboard.router, prefix="/api")
 app.include_router(users.router, prefix="/api")
 app.include_router(access.router, prefix="/api")
 app.include_router(catalog.router, prefix="/api")
+app.include_router(inventory.router, prefix="/api")

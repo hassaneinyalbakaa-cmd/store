@@ -40,13 +40,14 @@
 
 ## Product
 
-- Arabic RTL login and protected initial dashboard.
+- Arabic RTL login, protected dashboard, warehouse/department/item catalogs, and Phase 3 receiving and inventory screens.
 - User administration with three seeded roles: مدير النظام، أمين المخزن، موظف القسم.
-- Basic permission checks for dashboard, user management, and roles/permissions views.
+- Permission checks for dashboard, catalog administration, receiving, and inventory views.
 
 ## User preferences
 
-- The current phase intentionally excludes inventory items, receiving, issuing, transfers, stocktaking, and reports.
+- Phase 3 includes receipt notes, opening-balance and receipt movements, calculated balances, serial-number uniqueness, and expiry monitoring.
+- Issuing, transfers, stocktaking, and reports remain intentionally excluded.
 
 ## Gotchas
 

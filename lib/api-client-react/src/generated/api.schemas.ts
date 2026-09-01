@@ -230,6 +230,127 @@ export interface ItemUpdate {
   is_active?: boolean;
 }
 
+export interface ReceiptDetail {
+  id: number;
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  quantity: number;
+  warehouse_id: number;
+  warehouse_name: string;
+  storage_location: StorageLocation | null;
+  /** @nullable */
+  expiry_date: string | null;
+  serial_numbers: string[];
+}
+
+export interface Receipt {
+  id: number;
+  receipt_number: string;
+  receipt_date: string;
+  supplier: string;
+  document_number: string;
+  notes: string;
+  details: ReceiptDetail[];
+  created_at: string;
+}
+
+export interface ReceiptDetailInput {
+  item_id: number;
+  /** @exclusiveMinimum 0 */
+  quantity: number;
+  warehouse_id: number;
+  storage_location?: StorageLocationInput | null;
+  /** @nullable */
+  expiry_date?: string | null;
+  serial_numbers?: string[];
+}
+
+export interface ReceiptInput {
+  receipt_date: string;
+  /** @minLength 1 */
+  supplier: string;
+  document_number?: string;
+  notes?: string;
+  /** @minItems 1 */
+  details: ReceiptDetailInput[];
+}
+
+export type InventoryMovementMovementType = typeof InventoryMovementMovementType[keyof typeof InventoryMovementMovementType];
+
+
+export const InventoryMovementMovementType = {
+  opening: 'opening',
+  receipt: 'receipt',
+} as const;
+
+export interface InventoryMovement {
+  id: number;
+  movement_type: InventoryMovementMovementType;
+  movement_date: string;
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  storage_location: StorageLocation | null;
+  quantity: number;
+  /** @nullable */
+  expiry_date: string | null;
+  /** @nullable */
+  receipt_id: number | null;
+  /** @nullable */
+  receipt_number: string | null;
+  notes: string;
+  created_at: string;
+}
+
+export interface InventoryBalance {
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  storage_location: StorageLocation | null;
+  quantity: number;
+}
+
+export type InventoryExpiryBucket = typeof InventoryExpiryBucket[keyof typeof InventoryExpiryBucket];
+
+
+export const InventoryExpiryBucket = {
+  expired: 'expired',
+  within_30: 'within_30',
+  within_60: 'within_60',
+  within_90: 'within_90',
+} as const;
+
+export interface InventoryExpiry {
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  storage_location: StorageLocation | null;
+  expiry_date: string;
+  quantity: number;
+  days_remaining: number;
+  bucket: InventoryExpiryBucket;
+}
+
+export interface OpeningBalanceInput {
+  movement_date: string;
+  item_id: number;
+  /** @exclusiveMinimum 0 */
+  quantity: number;
+  warehouse_id: number;
+  storage_location?: StorageLocationInput | null;
+  /** @nullable */
+  expiry_date?: string | null;
+  serial_numbers?: string[];
+  notes?: string;
+}
+
 export interface DashboardSummary {
   users_total: number;
   active_users: number;
@@ -241,5 +362,13 @@ export type ListItemsParams = {
 search?: string;
 warehouseId?: number;
 isActive?: boolean;
+};
+
+export type ListInventoryExpiryParams = {
+/**
+ * @minimum 0
+ * @maximum 90
+ */
+withinDays?: number;
 };
 

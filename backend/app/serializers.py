@@ -1,8 +1,23 @@
-from .models import Department, Item, Role, StorageLocation, User, Warehouse
+from .models import (
+    Department,
+    InventoryMovement,
+    Item,
+    Receipt,
+    ReceiptDetail,
+    Role,
+    StorageLocation,
+    User,
+    Warehouse,
+)
 from .schemas import Role as RoleSchema
 from .schemas import (
     Department as DepartmentSchema,
     Item as ItemSchema,
+    InventoryBalance as InventoryBalanceSchema,
+    InventoryExpiry as InventoryExpirySchema,
+    InventoryMovement as InventoryMovementSchema,
+    Receipt as ReceiptSchema,
+    ReceiptDetail as ReceiptDetailSchema,
     SessionUser,
     StorageLocation as StorageLocationSchema,
     User as UserSchema,
@@ -93,4 +108,82 @@ def to_item(item: Item) -> ItemSchema:
         requires_expiry_date=item.requires_expiry_date,
         is_active=item.is_active,
         created_at=item.created_at,
+    )
+
+
+def to_receipt_detail(detail: ReceiptDetail) -> ReceiptDetailSchema:
+    return ReceiptDetailSchema(
+        id=detail.id,
+        item_id=detail.item_id,
+        item_code=detail.item.code,
+        item_name=detail.item.name,
+        quantity=detail.quantity,
+        warehouse_id=detail.warehouse_id,
+        warehouse_name=detail.warehouse.name,
+        storage_location=to_storage_location(detail.storage_location),
+        expiry_date=detail.expiry_date,
+        serial_numbers=[serial.serial_number for serial in detail.serials],
+    )
+
+
+def to_receipt(receipt: Receipt) -> ReceiptSchema:
+    return ReceiptSchema(
+        id=receipt.id,
+        receipt_number=receipt.receipt_number,
+        receipt_date=receipt.receipt_date,
+        supplier=receipt.supplier,
+        document_number=receipt.document_number,
+        notes=receipt.notes,
+        details=[to_receipt_detail(detail) for detail in receipt.details],
+        created_at=receipt.created_at,
+    )
+
+
+def to_inventory_movement(movement: InventoryMovement) -> InventoryMovementSchema:
+    receipt = movement.receipt_detail.receipt if movement.receipt_detail else None
+    return InventoryMovementSchema(
+        id=movement.id,
+        movement_type=movement.movement_type,
+        movement_date=movement.movement_date,
+        item_id=movement.item_id,
+        item_code=movement.item.code,
+        item_name=movement.item.name,
+        warehouse_id=movement.warehouse_id,
+        warehouse_name=movement.warehouse.name,
+        storage_location=to_storage_location(movement.storage_location),
+        quantity=movement.quantity,
+        expiry_date=movement.expiry_date,
+        receipt_id=receipt.id if receipt else None,
+        receipt_number=receipt.receipt_number if receipt else None,
+        notes=movement.notes,
+        created_at=movement.created_at,
+    )
+
+
+def to_inventory_balance(row: tuple) -> InventoryBalanceSchema:
+    item, warehouse, location, quantity = row
+    return InventoryBalanceSchema(
+        item_id=item.id,
+        item_code=item.code,
+        item_name=item.name,
+        warehouse_id=warehouse.id,
+        warehouse_name=warehouse.name,
+        storage_location=to_storage_location(location),
+        quantity=quantity,
+    )
+
+
+def to_inventory_expiry(row: tuple, days_remaining: int, bucket: str) -> InventoryExpirySchema:
+    item, warehouse, location, expiry_date, quantity = row
+    return InventoryExpirySchema(
+        item_id=item.id,
+        item_code=item.code,
+        item_name=item.name,
+        warehouse_id=warehouse.id,
+        warehouse_name=warehouse.name,
+        storage_location=to_storage_location(location),
+        expiry_date=expiry_date,
+        quantity=quantity,
+        days_remaining=days_remaining,
+        bucket=bucket,
     )
