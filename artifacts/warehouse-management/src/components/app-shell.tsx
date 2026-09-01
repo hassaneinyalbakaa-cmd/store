@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Archive, Box, Building2, ChevronLeft, ClipboardCheck, ClipboardList, ClipboardPlus, Layers3, LogOut, Menu, ShieldCheck, Users, Warehouse, X } from 'lucide-react';
+import { Archive, ArrowLeftRight, Box, Building2, ChevronLeft, ClipboardCheck, ClipboardList, ClipboardPlus, ClipboardPenLine, Layers3, LogOut, Menu, ShieldCheck, Users, Warehouse, X } from 'lucide-react';
 import type { SessionUser } from '@workspace/api-client-react';
 import { useLogout } from '@workspace/api-client-react';
 import { getGetCurrentUserQueryKey } from '@workspace/api-client-react';
@@ -17,6 +17,9 @@ const navigation = [
   { href: '/inventory', label: 'المخزون', icon: Layers3, permission: 'inventory:read' },
   { href: '/issue-requests', label: 'طلبات الصرف', icon: ClipboardCheck, permission: 'issue_requests:read' },
   { href: '/issue-vouchers', label: 'سندات الصرف', icon: ClipboardPlus, permission: 'issues:read' },
+  { href: '/transfers', label: 'تحويلات المخزون', icon: ArrowLeftRight, permission: 'transfers:read' },
+  { href: '/stocktakes', label: 'الجرد الفعلي', icon: ClipboardPenLine, permission: 'stocktakes:read' },
+  { href: '/stocktake-adjustments', label: 'تسويات الجرد', icon: ClipboardCheck, permission: 'stocktakes:read' },
 ];
 
 export function AppShell({ user, children }: { user: SessionUser; children: ReactNode }) {

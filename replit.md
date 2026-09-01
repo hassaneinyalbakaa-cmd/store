@@ -40,14 +40,14 @@
 
 ## Product
 
-- Arabic RTL login, protected dashboard, warehouse/department/item catalogs, and Phase 3 receiving and inventory screens.
+- Arabic RTL login, protected dashboard, warehouse/department/item catalogs, receiving and inventory screens, issue requests/vouchers, warehouse transfers, and auditable stocktakes.
 - User administration with three seeded roles: مدير النظام، أمين المخزن، موظف القسم.
 - Permission checks for dashboard, catalog administration, receiving, and inventory views.
 
 ## User preferences
 
-- Phase 3 includes receipt notes, opening-balance and receipt movements, calculated balances, serial-number uniqueness, and expiry monitoring.
-- Issuing, transfers, stocktaking, and reports remain intentionally excluded.
+- Inventory balances are calculated from opening, receipt, issue, transfer, and adjustment movements.
+- Phase 4 includes issue requests and immutable issue vouchers. Phase 5 includes transfers whose balances change only on receiving, plus full/partial stocktakes that create linked adjustment movements.
 
 ## Gotchas
 

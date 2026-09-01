@@ -27,6 +27,11 @@ PERMISSIONS = [
     ("issue_requests:write", "إنشاء طلبات الصرف", "إنشاء وإرسال طلبات الصرف"),
     ("issues:read", "عرض سندات الصرف", "عرض سندات الصرف المنفذة"),
     ("issues:write", "إدارة الصرف", "اعتماد ورفض وتنفيذ وإغلاق طلبات الصرف"),
+    ("transfers:read", "عرض التحويلات", "عرض تحويلات المخزون بين المخازن"),
+    ("transfers:write", "إدارة التحويلات", "إنشاء وإرسال وإكمال تحويلات المخزون"),
+    ("transfers:receive", "استلام التحويلات", "تأكيد استلام التحويلات في المخزن المستلم"),
+    ("stocktakes:read", "عرض الجرد", "عرض عمليات الجرد والتسويات المرتبطة بها"),
+    ("stocktakes:write", "إدارة الجرد", "إنشاء الجرد وإدخال العد الفعلي وإنهاؤه"),
 ]
 
 ROLES = [
@@ -53,6 +58,11 @@ ROLES = [
             "issue_requests:write",
             "issues:read",
             "issues:write",
+            "transfers:read",
+            "transfers:write",
+            "transfers:receive",
+            "stocktakes:read",
+            "stocktakes:write",
         ],
     ),
     (
@@ -75,6 +85,11 @@ ROLES = [
             "issue_requests:write",
             "issues:read",
             "issues:write",
+            "transfers:read",
+            "transfers:write",
+            "transfers:receive",
+            "stocktakes:read",
+            "stocktakes:write",
         ],
     ),
     (

@@ -32,6 +32,10 @@ tags:
     description: Department issue requests and their workflow
   - name: issue_vouchers
     description: Completed inventory issue vouchers
+  - name: transfers
+    description: Warehouse-to-warehouse stock transfers
+  - name: stocktakes
+    description: Full and partial stocktakes with adjustment movements
 paths:
   /healthz:
     get:
@@ -1252,6 +1256,495 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /transfers:
+    get:
+      operationId: listTransfers
+      tags: [transfers]
+      summary: List warehouse transfers
+      responses:
+        "200":
+          description: Warehouse transfers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockTransfer"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createTransfer
+      tags: [transfers]
+      summary: Create a draft warehouse transfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockTransferInput"
+      responses:
+        "201":
+          description: Draft warehouse transfer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTransfer"
+        "400":
+          description: Invalid warehouses, item, or quantity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /transfers/{transferId}:
+    get:
+      operationId: getTransfer
+      tags: [transfers]
+      summary: Get a warehouse transfer
+      parameters:
+        - name: transferId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Warehouse transfer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTransfer"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Transfer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /transfers/{transferId}/send:
+    post:
+      operationId: sendTransfer
+      tags: [transfers]
+      summary: Send a draft warehouse transfer
+      parameters:
+        - name: transferId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Sent transfer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTransfer"
+        "400":
+          description: Invalid status transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Transfer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /transfers/{transferId}/receive-preview:
+    get:
+      operationId: getTransferReceivePreview
+      tags: [transfers]
+      summary: Preview stock and serials before receiving a transfer
+      parameters:
+        - name: transferId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Transfer receive preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTransferPreview"
+        "400":
+          description: Transfer is not ready to receive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Transfer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /transfers/{transferId}/receive:
+    post:
+      operationId: receiveTransfer
+      tags: [transfers]
+      summary: Confirm receipt and update both warehouse balances
+      parameters:
+        - name: transferId
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StockTransferReceiveInput"
+      responses:
+        "200":
+          description: Received transfer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTransfer"
+        "400":
+          description: Insufficient stock, invalid serials, or invalid status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Transfer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /transfers/{transferId}/complete:
+    post:
+      operationId: completeTransfer
+      tags: [transfers]
+      summary: Complete a received warehouse transfer
+      parameters:
+        - name: transferId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Completed transfer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StockTransfer"
+        "400":
+          description: Invalid status transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Transfer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /stocktakes:
+    get:
+      operationId: listStocktakes
+      tags: [stocktakes]
+      summary: List stocktakes
+      responses:
+        "200":
+          description: Stocktakes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Stocktake"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createStocktake
+      tags: [stocktakes]
+      summary: Create a full or partial stocktake
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StocktakeInput"
+      responses:
+        "201":
+          description: Draft stocktake
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stocktake"
+        "400":
+          description: Invalid stocktake type, warehouse, or item selection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /stocktakes/{stocktakeId}:
+    get:
+      operationId: getStocktake
+      tags: [stocktakes]
+      summary: Get a stocktake with count lines
+      parameters:
+        - name: stocktakeId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Stocktake
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stocktake"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Stocktake not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /stocktakes/{stocktakeId}/lines/{lineId}/count:
+    post:
+      operationId: countStocktakeLine
+      tags: [stocktakes]
+      summary: Record the physical quantity for a stocktake line
+      parameters:
+        - name: stocktakeId
+          in: path
+          required: true
+          schema:
+            type: number
+        - name: lineId
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StocktakeCountInput"
+      responses:
+        "200":
+          description: Updated stocktake line
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StocktakeLine"
+        "400":
+          description: Invalid count or completed stocktake
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Stocktake line not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /stocktakes/{stocktakeId}/complete:
+    post:
+      operationId: completeStocktake
+      tags: [stocktakes]
+      summary: Complete a stocktake and create adjustment movements
+      parameters:
+        - name: stocktakeId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Completed stocktake
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stocktake"
+        "400":
+          description: Missing counts, serial adjustment, or invalid status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Stocktake not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /stocktake-adjustments:
+    get:
+      operationId: listStocktakeAdjustments
+      tags: [stocktakes]
+      summary: List stocktake adjustment movements
+      responses:
+        "200":
+          description: Stocktake adjustments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StocktakeAdjustment"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -1712,7 +2205,7 @@ components:
           type: number
         movement_type:
           type: string
-          enum: [opening, receipt, issue]
+          enum: [opening, receipt, issue, transfer_out, transfer_in, adjustment]
         movement_date:
           type: string
           format: date
@@ -1980,6 +2473,262 @@ components:
           type: string
           format: date-time
       required: [id, issue_number, request_id, request_number, department_id, department_name, item_id, item_code, item_name, item_unit, warehouse_id, warehouse_name, quantity, serial_numbers, issued_by_id, issued_by_name, issued_at]
+    StockTransferStatus:
+      type: string
+      enum: [draft, sent, received, completed]
+    StocktakeType:
+      type: string
+      enum: [full, partial]
+    StocktakeStatus:
+      type: string
+      enum: [draft, completed]
+    StockTransferInput:
+      type: object
+      properties:
+        source_warehouse_id:
+          type: number
+        destination_warehouse_id:
+          type: number
+        item_id:
+          type: number
+        quantity:
+          type: number
+          exclusiveMinimum: 0
+        reason:
+          type: string
+          minLength: 1
+        notes:
+          type: string
+      required: [source_warehouse_id, destination_warehouse_id, item_id, quantity, reason]
+    StockTransferReceiveInput:
+      type: object
+      properties:
+        serial_numbers:
+          type: array
+          items:
+            type: string
+      required: []
+    StockTransferPreview:
+      type: object
+      properties:
+        transfer_id:
+          type: number
+        transfer_number:
+          type: string
+        source_warehouse_id:
+          type: number
+        source_warehouse_name:
+          type: string
+        destination_warehouse_id:
+          type: number
+        destination_warehouse_name:
+          type: string
+        item_id:
+          type: number
+        item_code:
+          type: string
+        item_name:
+          type: string
+        item_unit:
+          type: string
+        quantity:
+          type: number
+        current_source_balance:
+          type: number
+        available_quantity:
+          type: number
+        requires_serial_number:
+          type: boolean
+        available_serial_numbers:
+          type: array
+          items:
+            type: string
+      required: [transfer_id, transfer_number, source_warehouse_id, source_warehouse_name, destination_warehouse_id, destination_warehouse_name, item_id, item_code, item_name, item_unit, quantity, current_source_balance, available_quantity, requires_serial_number, available_serial_numbers]
+    StockTransfer:
+      type: object
+      properties:
+        id:
+          type: number
+        transfer_number:
+          type: string
+        source_warehouse_id:
+          type: number
+        source_warehouse_name:
+          type: string
+        destination_warehouse_id:
+          type: number
+        destination_warehouse_name:
+          type: string
+        item_id:
+          type: number
+        item_code:
+          type: string
+        item_name:
+          type: string
+        item_unit:
+          type: string
+        quantity:
+          type: number
+        reason:
+          type: string
+        notes:
+          type: string
+        status:
+          $ref: "#/components/schemas/StockTransferStatus"
+        serial_numbers:
+          type: array
+          items:
+            type: string
+        current_source_balance:
+          type: number
+        available_quantity:
+          type: number
+        created_by_id:
+          type: number
+        created_by_name:
+          type: string
+        sent_at:
+          type: ["string", "null"]
+          format: date-time
+        received_by_id:
+          type: ["number", "null"]
+        received_by_name:
+          type: ["string", "null"]
+        received_at:
+          type: ["string", "null"]
+          format: date-time
+        completed_by_id:
+          type: ["number", "null"]
+        completed_by_name:
+          type: ["string", "null"]
+        completed_at:
+          type: ["string", "null"]
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+      required: [id, transfer_number, source_warehouse_id, source_warehouse_name, destination_warehouse_id, destination_warehouse_name, item_id, item_code, item_name, item_unit, quantity, reason, notes, status, serial_numbers, current_source_balance, available_quantity, created_by_id, created_by_name, sent_at, received_by_id, received_by_name, received_at, completed_by_id, completed_by_name, completed_at, created_at]
+    StocktakeInput:
+      type: object
+      properties:
+        stocktake_type:
+          $ref: "#/components/schemas/StocktakeType"
+        warehouse_id:
+          type: number
+        stocktake_date:
+          type: string
+          format: date
+        item_ids:
+          type: array
+          items:
+            type: number
+        notes:
+          type: string
+      required: [stocktake_type, warehouse_id, stocktake_date]
+    StocktakeCountInput:
+      type: object
+      properties:
+        actual_quantity:
+          type: number
+          minimum: 0
+      required: [actual_quantity]
+    StocktakeLine:
+      type: object
+      properties:
+        id:
+          type: number
+        stocktake_id:
+          type: number
+        item_id:
+          type: number
+        item_code:
+          type: string
+        item_name:
+          type: string
+        item_unit:
+          type: string
+        warehouse_id:
+          type: number
+        warehouse_name:
+          type: string
+        system_quantity:
+          type: number
+        actual_quantity:
+          type: ["number", "null"]
+        difference:
+          type: ["number", "null"]
+        adjustment_movement_id:
+          type: ["number", "null"]
+      required: [id, stocktake_id, item_id, item_code, item_name, item_unit, warehouse_id, warehouse_name, system_quantity, actual_quantity, difference, adjustment_movement_id]
+    Stocktake:
+      type: object
+      properties:
+        id:
+          type: number
+        stocktake_number:
+          type: string
+        stocktake_type:
+          $ref: "#/components/schemas/StocktakeType"
+        warehouse_id:
+          type: number
+        warehouse_name:
+          type: string
+        stocktake_date:
+          type: string
+          format: date
+        status:
+          $ref: "#/components/schemas/StocktakeStatus"
+        notes:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/StocktakeLine"
+        created_by_id:
+          type: number
+        created_by_name:
+          type: string
+        completed_by_id:
+          type: ["number", "null"]
+        completed_by_name:
+          type: ["string", "null"]
+        completed_at:
+          type: ["string", "null"]
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+      required: [id, stocktake_number, stocktake_type, warehouse_id, warehouse_name, stocktake_date, status, notes, lines, created_by_id, created_by_name, completed_by_id, completed_by_name, completed_at, created_at]
+    StocktakeAdjustment:
+      type: object
+      properties:
+        movement_id:
+          type: number
+        stocktake_id:
+          type: number
+        stocktake_number:
+          type: string
+        stocktake_line_id:
+          type: number
+        item_id:
+          type: number
+        item_code:
+          type: string
+        item_name:
+          type: string
+        warehouse_id:
+          type: number
+        warehouse_name:
+          type: string
+        quantity:
+          type: number
+        movement_date:
+          type: string
+          format: date
+        created_at:
+          type: string
+          format: date-time
+      required: [movement_id, stocktake_id, stocktake_number, stocktake_line_id, item_id, item_code, item_name, warehouse_id, warehouse_name, quantity, movement_date, created_at]
     DashboardSummary:
       type: object
       properties:

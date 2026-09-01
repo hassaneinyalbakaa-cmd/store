@@ -283,6 +283,9 @@ export const InventoryMovementMovementType = {
   opening: 'opening',
   receipt: 'receipt',
   issue: 'issue',
+  transfer_out: 'transfer_out',
+  transfer_in: 'transfer_in',
+  adjustment: 'adjustment',
 } as const;
 
 export interface InventoryMovement {
@@ -446,6 +449,169 @@ export interface IssueVoucher {
   issued_by_id: number;
   issued_by_name: string;
   issued_at: string;
+}
+
+export type StockTransferStatus = typeof StockTransferStatus[keyof typeof StockTransferStatus];
+
+
+export const StockTransferStatus = {
+  draft: 'draft',
+  sent: 'sent',
+  received: 'received',
+  completed: 'completed',
+} as const;
+
+export type StocktakeType = typeof StocktakeType[keyof typeof StocktakeType];
+
+
+export const StocktakeType = {
+  full: 'full',
+  partial: 'partial',
+} as const;
+
+export type StocktakeStatus = typeof StocktakeStatus[keyof typeof StocktakeStatus];
+
+
+export const StocktakeStatus = {
+  draft: 'draft',
+  completed: 'completed',
+} as const;
+
+export interface StockTransferInput {
+  source_warehouse_id: number;
+  destination_warehouse_id: number;
+  item_id: number;
+  /** @exclusiveMinimum 0 */
+  quantity: number;
+  /** @minLength 1 */
+  reason: string;
+  notes?: string;
+}
+
+export interface StockTransferReceiveInput {
+  serial_numbers?: string[];
+}
+
+export interface StockTransferPreview {
+  transfer_id: number;
+  transfer_number: string;
+  source_warehouse_id: number;
+  source_warehouse_name: string;
+  destination_warehouse_id: number;
+  destination_warehouse_name: string;
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  item_unit: string;
+  quantity: number;
+  current_source_balance: number;
+  available_quantity: number;
+  requires_serial_number: boolean;
+  available_serial_numbers: string[];
+}
+
+export interface StockTransfer {
+  id: number;
+  transfer_number: string;
+  source_warehouse_id: number;
+  source_warehouse_name: string;
+  destination_warehouse_id: number;
+  destination_warehouse_name: string;
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  item_unit: string;
+  quantity: number;
+  reason: string;
+  notes: string;
+  status: StockTransferStatus;
+  serial_numbers: string[];
+  current_source_balance: number;
+  available_quantity: number;
+  created_by_id: number;
+  created_by_name: string;
+  /** @nullable */
+  sent_at: string | null;
+  /** @nullable */
+  received_by_id: number | null;
+  /** @nullable */
+  received_by_name: string | null;
+  /** @nullable */
+  received_at: string | null;
+  /** @nullable */
+  completed_by_id: number | null;
+  /** @nullable */
+  completed_by_name: string | null;
+  /** @nullable */
+  completed_at: string | null;
+  created_at: string;
+}
+
+export interface StocktakeInput {
+  stocktake_type: StocktakeType;
+  warehouse_id: number;
+  stocktake_date: string;
+  item_ids?: number[];
+  notes?: string;
+}
+
+export interface StocktakeCountInput {
+  /** @minimum 0 */
+  actual_quantity: number;
+}
+
+export interface StocktakeLine {
+  id: number;
+  stocktake_id: number;
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  item_unit: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  system_quantity: number;
+  /** @nullable */
+  actual_quantity: number | null;
+  /** @nullable */
+  difference: number | null;
+  /** @nullable */
+  adjustment_movement_id: number | null;
+}
+
+export interface Stocktake {
+  id: number;
+  stocktake_number: string;
+  stocktake_type: StocktakeType;
+  warehouse_id: number;
+  warehouse_name: string;
+  stocktake_date: string;
+  status: StocktakeStatus;
+  notes: string;
+  lines: StocktakeLine[];
+  created_by_id: number;
+  created_by_name: string;
+  /** @nullable */
+  completed_by_id: number | null;
+  /** @nullable */
+  completed_by_name: string | null;
+  /** @nullable */
+  completed_at: string | null;
+  created_at: string;
+}
+
+export interface StocktakeAdjustment {
+  movement_id: number;
+  stocktake_id: number;
+  stocktake_number: string;
+  stocktake_line_id: number;
+  item_id: number;
+  item_code: string;
+  item_name: string;
+  warehouse_id: number;
+  warehouse_name: string;
+  quantity: number;
+  movement_date: string;
+  created_at: string;
 }
 
 export interface DashboardSummary {

@@ -353,3 +353,124 @@ class IssueVoucher(BaseModel):
     issued_by_id: int
     issued_by_name: str
     issued_at: datetime
+
+
+class StockTransfer(BaseModel):
+    id: int
+    transfer_number: str
+    source_warehouse_id: int
+    source_warehouse_name: str
+    destination_warehouse_id: int
+    destination_warehouse_name: str
+    item_id: int
+    item_code: str
+    item_name: str
+    item_unit: str
+    quantity: float
+    reason: str
+    notes: str
+    status: str
+    serial_numbers: list[str]
+    current_source_balance: float
+    available_quantity: float
+    created_by_id: int
+    created_by_name: str
+    sent_at: datetime | None
+    received_by_id: int | None
+    received_by_name: str | None
+    received_at: datetime | None
+    completed_by_id: int | None
+    completed_by_name: str | None
+    completed_at: datetime | None
+    created_at: datetime
+
+
+class StockTransferInput(BaseModel):
+    source_warehouse_id: int
+    destination_warehouse_id: int
+    item_id: int
+    quantity: float = Field(gt=0)
+    reason: str = Field(min_length=1, max_length=255)
+    notes: str = Field(default="", max_length=500)
+
+
+class StockTransferReceiveInput(BaseModel):
+    serial_numbers: list[str] = Field(default_factory=list)
+
+
+class StockTransferPreview(BaseModel):
+    transfer_id: int
+    transfer_number: str
+    source_warehouse_id: int
+    source_warehouse_name: str
+    destination_warehouse_id: int
+    destination_warehouse_name: str
+    item_id: int
+    item_code: str
+    item_name: str
+    item_unit: str
+    quantity: float
+    current_source_balance: float
+    available_quantity: float
+    requires_serial_number: bool
+    available_serial_numbers: list[str]
+
+
+class StocktakeLine(BaseModel):
+    id: int
+    stocktake_id: int
+    item_id: int
+    item_code: str
+    item_name: str
+    item_unit: str
+    warehouse_id: int
+    warehouse_name: str
+    system_quantity: float
+    actual_quantity: float | None
+    difference: float | None
+    adjustment_movement_id: int | None
+
+
+class Stocktake(BaseModel):
+    id: int
+    stocktake_number: str
+    stocktake_type: str
+    warehouse_id: int
+    warehouse_name: str
+    stocktake_date: date
+    status: str
+    notes: str
+    lines: list[StocktakeLine]
+    created_by_id: int
+    created_by_name: str
+    completed_by_id: int | None
+    completed_by_name: str | None
+    completed_at: datetime | None
+    created_at: datetime
+
+
+class StocktakeInput(BaseModel):
+    stocktake_type: str = Field(pattern="^(full|partial)$")
+    warehouse_id: int
+    stocktake_date: date
+    item_ids: list[int] = Field(default_factory=list)
+    notes: str = Field(default="", max_length=500)
+
+
+class StocktakeCountInput(BaseModel):
+    actual_quantity: float = Field(ge=0)
+
+
+class StocktakeAdjustment(BaseModel):
+    movement_id: int
+    stocktake_id: int
+    stocktake_number: str
+    stocktake_line_id: int
+    item_id: int
+    item_code: str
+    item_name: str
+    warehouse_id: int
+    warehouse_name: str
+    quantity: float
+    movement_date: date
+    created_at: datetime

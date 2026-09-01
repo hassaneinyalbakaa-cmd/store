@@ -7,7 +7,11 @@ from .models import (
     Receipt,
     ReceiptDetail,
     Role,
+    Stocktake,
+    StocktakeLine,
+    StockTransfer,
     StorageLocation,
+    TransferSerial,
     User,
     Warehouse,
 )
@@ -21,6 +25,11 @@ from .schemas import (
     IssueRequest as IssueRequestSchema,
     IssueRequestPreview as IssueRequestPreviewSchema,
     IssueVoucher as IssueVoucherSchema,
+    Stocktake as StocktakeSchema,
+    StocktakeAdjustment as StocktakeAdjustmentSchema,
+    StocktakeLine as StocktakeLineSchema,
+    StockTransfer as StockTransferSchema,
+    StockTransferPreview as StockTransferPreviewSchema,
     Receipt as ReceiptSchema,
     ReceiptDetail as ReceiptDetailSchema,
     SessionUser,
@@ -269,4 +278,132 @@ def to_issue_voucher(voucher: IssueVoucher) -> IssueVoucherSchema:
         issued_by_id=voucher.issued_by_id,
         issued_by_name=voucher.issued_by.display_name,
         issued_at=voucher.issued_at,
+    )
+
+
+def to_stock_transfer(
+    transfer: StockTransfer,
+    current_source_balance: float,
+    available_quantity: float,
+) -> StockTransferSchema:
+    return StockTransferSchema(
+        id=transfer.id,
+        transfer_number=transfer.transfer_number,
+        source_warehouse_id=transfer.source_warehouse_id,
+        source_warehouse_name=transfer.source_warehouse.name,
+        destination_warehouse_id=transfer.destination_warehouse_id,
+        destination_warehouse_name=transfer.destination_warehouse.name,
+        item_id=transfer.item_id,
+        item_code=transfer.item.code,
+        item_name=transfer.item.name,
+        item_unit=transfer.item.unit,
+        quantity=transfer.quantity,
+        reason=transfer.reason,
+        notes=transfer.notes,
+        status=transfer.status,
+        serial_numbers=[serial.serial_number for serial in transfer.serials],
+        current_source_balance=current_source_balance,
+        available_quantity=available_quantity,
+        created_by_id=transfer.created_by_id,
+        created_by_name=transfer.created_by.display_name,
+        sent_at=transfer.sent_at,
+        received_by_id=transfer.received_by_id,
+        received_by_name=transfer.received_by.display_name if transfer.received_by else None,
+        received_at=transfer.received_at,
+        completed_by_id=transfer.completed_by_id,
+        completed_by_name=(
+            transfer.completed_by.display_name if transfer.completed_by else None
+        ),
+        completed_at=transfer.completed_at,
+        created_at=transfer.created_at,
+    )
+
+
+def to_stock_transfer_preview(
+    transfer: StockTransfer,
+    current_source_balance: float,
+    available_quantity: float,
+    available_serial_numbers: list[str],
+) -> StockTransferPreviewSchema:
+    return StockTransferPreviewSchema(
+        transfer_id=transfer.id,
+        transfer_number=transfer.transfer_number,
+        source_warehouse_id=transfer.source_warehouse_id,
+        source_warehouse_name=transfer.source_warehouse.name,
+        destination_warehouse_id=transfer.destination_warehouse_id,
+        destination_warehouse_name=transfer.destination_warehouse.name,
+        item_id=transfer.item_id,
+        item_code=transfer.item.code,
+        item_name=transfer.item.name,
+        item_unit=transfer.item.unit,
+        quantity=transfer.quantity,
+        current_source_balance=current_source_balance,
+        available_quantity=available_quantity,
+        requires_serial_number=transfer.item.requires_serial_number,
+        available_serial_numbers=available_serial_numbers,
+    )
+
+
+def to_stocktake_line(
+    line: StocktakeLine, adjustment_movement_id: int | None
+) -> StocktakeLineSchema:
+    return StocktakeLineSchema(
+        id=line.id,
+        stocktake_id=line.stocktake_id,
+        item_id=line.item_id,
+        item_code=line.item.code,
+        item_name=line.item.name,
+        item_unit=line.item.unit,
+        warehouse_id=line.warehouse_id,
+        warehouse_name=line.warehouse.name,
+        system_quantity=line.system_quantity,
+        actual_quantity=line.actual_quantity,
+        difference=line.difference,
+        adjustment_movement_id=adjustment_movement_id,
+    )
+
+
+def to_stocktake(
+    stocktake: Stocktake, adjustment_ids: dict[int, int] | None = None
+) -> StocktakeSchema:
+    adjustment_ids = adjustment_ids or {}
+    return StocktakeSchema(
+        id=stocktake.id,
+        stocktake_number=stocktake.stocktake_number,
+        stocktake_type=stocktake.stocktake_type,
+        warehouse_id=stocktake.warehouse_id,
+        warehouse_name=stocktake.warehouse.name,
+        stocktake_date=stocktake.stocktake_date,
+        status=stocktake.status,
+        notes=stocktake.notes,
+        lines=[
+            to_stocktake_line(line, adjustment_ids.get(line.id))
+            for line in stocktake.lines
+        ],
+        created_by_id=stocktake.created_by_id,
+        created_by_name=stocktake.created_by.display_name,
+        completed_by_id=stocktake.completed_by_id,
+        completed_by_name=(
+            stocktake.completed_by.display_name if stocktake.completed_by else None
+        ),
+        completed_at=stocktake.completed_at,
+        created_at=stocktake.created_at,
+    )
+
+
+def to_stocktake_adjustment(row: tuple) -> StocktakeAdjustmentSchema:
+    movement, stocktake, line = row
+    return StocktakeAdjustmentSchema(
+        movement_id=movement.id,
+        stocktake_id=stocktake.id,
+        stocktake_number=stocktake.stocktake_number,
+        stocktake_line_id=line.id,
+        item_id=movement.item_id,
+        item_code=movement.item.code,
+        item_name=movement.item.name,
+        warehouse_id=movement.warehouse_id,
+        warehouse_name=movement.warehouse.name,
+        quantity=movement.quantity,
+        movement_date=movement.movement_date,
+        created_at=movement.created_at,
     )

@@ -584,7 +584,7 @@ export const GetReceiptResponse = zod.object({
  */
 export const ListInventoryMovementsResponseItem = zod.object({
   "id": zod.number(),
-  "movement_type": zod.enum(['opening', 'receipt', 'issue']),
+  "movement_type": zod.enum(['opening', 'receipt', 'issue', 'transfer_out', 'transfer_in', 'adjustment']),
   "movement_date": zod.coerce.date(),
   "item_id": zod.number(),
   "item_code": zod.string(),
@@ -689,7 +689,7 @@ export const CreateOpeningBalanceBody = zod.object({
 
 export const CreateOpeningBalanceResponse = zod.object({
   "id": zod.number(),
-  "movement_type": zod.enum(['opening', 'receipt', 'issue']),
+  "movement_type": zod.enum(['opening', 'receipt', 'issue', 'transfer_out', 'transfer_in', 'adjustment']),
   "movement_date": zod.coerce.date(),
   "item_id": zod.number(),
   "item_code": zod.string(),
@@ -1070,5 +1070,479 @@ export const GetIssueVoucherResponse = zod.object({
   "issued_by_name": zod.string(),
   "issued_at": zod.coerce.date()
 })
+
+
+/**
+ * @summary List warehouse transfers
+ */
+export const ListTransfersResponseItem = zod.object({
+  "id": zod.number(),
+  "transfer_number": zod.string(),
+  "source_warehouse_id": zod.number(),
+  "source_warehouse_name": zod.string(),
+  "destination_warehouse_id": zod.number(),
+  "destination_warehouse_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "quantity": zod.number(),
+  "reason": zod.string(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'received', 'completed']),
+  "serial_numbers": zod.array(zod.string()),
+  "current_source_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "sent_at": zod.coerce.date().nullable(),
+  "received_by_id": zod.number().nullable(),
+  "received_by_name": zod.string().nullable(),
+  "received_at": zod.coerce.date().nullable(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+export const ListTransfersResponse = zod.array(ListTransfersResponseItem)
+
+
+/**
+ * @summary Create a draft warehouse transfer
+ */
+export const createTransferBodyQuantityExclusiveMin = 0;
+
+
+
+
+export const CreateTransferBody = zod.object({
+  "source_warehouse_id": zod.number(),
+  "destination_warehouse_id": zod.number(),
+  "item_id": zod.number(),
+  "quantity": zod.number().gt(createTransferBodyQuantityExclusiveMin),
+  "reason": zod.string().min(1),
+  "notes": zod.string().optional()
+})
+
+export const CreateTransferResponse = zod.object({
+  "id": zod.number(),
+  "transfer_number": zod.string(),
+  "source_warehouse_id": zod.number(),
+  "source_warehouse_name": zod.string(),
+  "destination_warehouse_id": zod.number(),
+  "destination_warehouse_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "quantity": zod.number(),
+  "reason": zod.string(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'received', 'completed']),
+  "serial_numbers": zod.array(zod.string()),
+  "current_source_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "sent_at": zod.coerce.date().nullable(),
+  "received_by_id": zod.number().nullable(),
+  "received_by_name": zod.string().nullable(),
+  "received_at": zod.coerce.date().nullable(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get a warehouse transfer
+ */
+export const GetTransferParams = zod.object({
+  "transferId": zod.coerce.number()
+})
+
+export const GetTransferResponse = zod.object({
+  "id": zod.number(),
+  "transfer_number": zod.string(),
+  "source_warehouse_id": zod.number(),
+  "source_warehouse_name": zod.string(),
+  "destination_warehouse_id": zod.number(),
+  "destination_warehouse_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "quantity": zod.number(),
+  "reason": zod.string(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'received', 'completed']),
+  "serial_numbers": zod.array(zod.string()),
+  "current_source_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "sent_at": zod.coerce.date().nullable(),
+  "received_by_id": zod.number().nullable(),
+  "received_by_name": zod.string().nullable(),
+  "received_at": zod.coerce.date().nullable(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Send a draft warehouse transfer
+ */
+export const SendTransferParams = zod.object({
+  "transferId": zod.coerce.number()
+})
+
+export const SendTransferResponse = zod.object({
+  "id": zod.number(),
+  "transfer_number": zod.string(),
+  "source_warehouse_id": zod.number(),
+  "source_warehouse_name": zod.string(),
+  "destination_warehouse_id": zod.number(),
+  "destination_warehouse_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "quantity": zod.number(),
+  "reason": zod.string(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'received', 'completed']),
+  "serial_numbers": zod.array(zod.string()),
+  "current_source_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "sent_at": zod.coerce.date().nullable(),
+  "received_by_id": zod.number().nullable(),
+  "received_by_name": zod.string().nullable(),
+  "received_at": zod.coerce.date().nullable(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Preview stock and serials before receiving a transfer
+ */
+export const GetTransferReceivePreviewParams = zod.object({
+  "transferId": zod.coerce.number()
+})
+
+export const GetTransferReceivePreviewResponse = zod.object({
+  "transfer_id": zod.number(),
+  "transfer_number": zod.string(),
+  "source_warehouse_id": zod.number(),
+  "source_warehouse_name": zod.string(),
+  "destination_warehouse_id": zod.number(),
+  "destination_warehouse_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "quantity": zod.number(),
+  "current_source_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "requires_serial_number": zod.boolean(),
+  "available_serial_numbers": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Confirm receipt and update both warehouse balances
+ */
+export const ReceiveTransferParams = zod.object({
+  "transferId": zod.coerce.number()
+})
+
+export const ReceiveTransferBody = zod.object({
+  "serial_numbers": zod.array(zod.string()).optional()
+})
+
+export const ReceiveTransferResponse = zod.object({
+  "id": zod.number(),
+  "transfer_number": zod.string(),
+  "source_warehouse_id": zod.number(),
+  "source_warehouse_name": zod.string(),
+  "destination_warehouse_id": zod.number(),
+  "destination_warehouse_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "quantity": zod.number(),
+  "reason": zod.string(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'received', 'completed']),
+  "serial_numbers": zod.array(zod.string()),
+  "current_source_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "sent_at": zod.coerce.date().nullable(),
+  "received_by_id": zod.number().nullable(),
+  "received_by_name": zod.string().nullable(),
+  "received_at": zod.coerce.date().nullable(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Complete a received warehouse transfer
+ */
+export const CompleteTransferParams = zod.object({
+  "transferId": zod.coerce.number()
+})
+
+export const CompleteTransferResponse = zod.object({
+  "id": zod.number(),
+  "transfer_number": zod.string(),
+  "source_warehouse_id": zod.number(),
+  "source_warehouse_name": zod.string(),
+  "destination_warehouse_id": zod.number(),
+  "destination_warehouse_name": zod.string(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "quantity": zod.number(),
+  "reason": zod.string(),
+  "notes": zod.string(),
+  "status": zod.enum(['draft', 'sent', 'received', 'completed']),
+  "serial_numbers": zod.array(zod.string()),
+  "current_source_balance": zod.number(),
+  "available_quantity": zod.number(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "sent_at": zod.coerce.date().nullable(),
+  "received_by_id": zod.number().nullable(),
+  "received_by_name": zod.string().nullable(),
+  "received_at": zod.coerce.date().nullable(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary List stocktakes
+ */
+export const ListStocktakesResponseItem = zod.object({
+  "id": zod.number(),
+  "stocktake_number": zod.string(),
+  "stocktake_type": zod.enum(['full', 'partial']),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "stocktake_date": zod.coerce.date(),
+  "status": zod.enum(['draft', 'completed']),
+  "notes": zod.string(),
+  "lines": zod.array(zod.object({
+  "id": zod.number(),
+  "stocktake_id": zod.number(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "system_quantity": zod.number(),
+  "actual_quantity": zod.number().nullable(),
+  "difference": zod.number().nullable(),
+  "adjustment_movement_id": zod.number().nullable()
+})),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+export const ListStocktakesResponse = zod.array(ListStocktakesResponseItem)
+
+
+/**
+ * @summary Create a full or partial stocktake
+ */
+export const CreateStocktakeBody = zod.object({
+  "stocktake_type": zod.enum(['full', 'partial']),
+  "warehouse_id": zod.number(),
+  "stocktake_date": zod.coerce.date(),
+  "item_ids": zod.array(zod.number()).optional(),
+  "notes": zod.string().optional()
+})
+
+export const CreateStocktakeResponse = zod.object({
+  "id": zod.number(),
+  "stocktake_number": zod.string(),
+  "stocktake_type": zod.enum(['full', 'partial']),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "stocktake_date": zod.coerce.date(),
+  "status": zod.enum(['draft', 'completed']),
+  "notes": zod.string(),
+  "lines": zod.array(zod.object({
+  "id": zod.number(),
+  "stocktake_id": zod.number(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "system_quantity": zod.number(),
+  "actual_quantity": zod.number().nullable(),
+  "difference": zod.number().nullable(),
+  "adjustment_movement_id": zod.number().nullable()
+})),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Get a stocktake with count lines
+ */
+export const GetStocktakeParams = zod.object({
+  "stocktakeId": zod.coerce.number()
+})
+
+export const GetStocktakeResponse = zod.object({
+  "id": zod.number(),
+  "stocktake_number": zod.string(),
+  "stocktake_type": zod.enum(['full', 'partial']),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "stocktake_date": zod.coerce.date(),
+  "status": zod.enum(['draft', 'completed']),
+  "notes": zod.string(),
+  "lines": zod.array(zod.object({
+  "id": zod.number(),
+  "stocktake_id": zod.number(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "system_quantity": zod.number(),
+  "actual_quantity": zod.number().nullable(),
+  "difference": zod.number().nullable(),
+  "adjustment_movement_id": zod.number().nullable()
+})),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary Record the physical quantity for a stocktake line
+ */
+export const CountStocktakeLineParams = zod.object({
+  "stocktakeId": zod.coerce.number(),
+  "lineId": zod.coerce.number()
+})
+
+export const countStocktakeLineBodyActualQuantityMin = 0;
+
+
+
+export const CountStocktakeLineBody = zod.object({
+  "actual_quantity": zod.number().min(countStocktakeLineBodyActualQuantityMin)
+})
+
+export const CountStocktakeLineResponse = zod.object({
+  "id": zod.number(),
+  "stocktake_id": zod.number(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "system_quantity": zod.number(),
+  "actual_quantity": zod.number().nullable(),
+  "difference": zod.number().nullable(),
+  "adjustment_movement_id": zod.number().nullable()
+})
+
+
+/**
+ * @summary Complete a stocktake and create adjustment movements
+ */
+export const CompleteStocktakeParams = zod.object({
+  "stocktakeId": zod.coerce.number()
+})
+
+export const CompleteStocktakeResponse = zod.object({
+  "id": zod.number(),
+  "stocktake_number": zod.string(),
+  "stocktake_type": zod.enum(['full', 'partial']),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "stocktake_date": zod.coerce.date(),
+  "status": zod.enum(['draft', 'completed']),
+  "notes": zod.string(),
+  "lines": zod.array(zod.object({
+  "id": zod.number(),
+  "stocktake_id": zod.number(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "item_unit": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "system_quantity": zod.number(),
+  "actual_quantity": zod.number().nullable(),
+  "difference": zod.number().nullable(),
+  "adjustment_movement_id": zod.number().nullable()
+})),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "completed_by_id": zod.number().nullable(),
+  "completed_by_name": zod.string().nullable(),
+  "completed_at": zod.coerce.date().nullable(),
+  "created_at": zod.coerce.date()
+})
+
+
+/**
+ * @summary List stocktake adjustment movements
+ */
+export const ListStocktakeAdjustmentsResponseItem = zod.object({
+  "movement_id": zod.number(),
+  "stocktake_id": zod.number(),
+  "stocktake_number": zod.string(),
+  "stocktake_line_id": zod.number(),
+  "item_id": zod.number(),
+  "item_code": zod.string(),
+  "item_name": zod.string(),
+  "warehouse_id": zod.number(),
+  "warehouse_name": zod.string(),
+  "quantity": zod.number(),
+  "movement_date": zod.coerce.date(),
+  "created_at": zod.coerce.date()
+})
+export const ListStocktakeAdjustmentsResponse = zod.array(ListStocktakeAdjustmentsResponseItem)
 
 

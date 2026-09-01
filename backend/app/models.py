@@ -217,6 +217,12 @@ class InventoryMovement(Base):
     issue_voucher_id: Mapped[int | None] = mapped_column(
         ForeignKey("issue_vouchers.id"), nullable=True, unique=True
     )
+    transfer_id: Mapped[int | None] = mapped_column(
+        ForeignKey("stock_transfers.id"), nullable=True, index=True
+    )
+    stocktake_line_id: Mapped[int | None] = mapped_column(
+        ForeignKey("stocktake_lines.id"), nullable=True, unique=True, index=True
+    )
     notes: Mapped[str] = mapped_column(String(500), default="")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -227,6 +233,9 @@ class InventoryMovement(Base):
     receipt_detail: Mapped[ReceiptDetail | None] = relationship(back_populates="movement")
     issue_voucher: Mapped["IssueVoucher | None"] = relationship(
         back_populates="movement"
+    )
+    transfer: Mapped["StockTransfer | None"] = relationship(
+        back_populates="movements"
     )
     serials: Mapped[list["InventorySerial"]] = relationship(
         back_populates="movement", cascade="all, delete-orphan", lazy="selectin"
@@ -319,3 +328,136 @@ class IssueVoucher(Base):
     serials: Mapped[list[InventorySerial]] = relationship(
         back_populates="issue_voucher"
     )
+
+
+class StockTransfer(Base):
+    __tablename__ = "stock_transfers"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    transfer_number: Mapped[str] = mapped_column(String(40), unique=True)
+    source_warehouse_id: Mapped[int] = mapped_column(
+        ForeignKey("warehouses.id"), index=True
+    )
+    destination_warehouse_id: Mapped[int] = mapped_column(
+        ForeignKey("warehouses.id"), index=True
+    )
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id"), index=True)
+    quantity: Mapped[float] = mapped_column(Float)
+    reason: Mapped[str] = mapped_column(String(255))
+    notes: Mapped[str] = mapped_column(String(500), default="")
+    status: Mapped[str] = mapped_column(
+        String(20), default="draft", server_default="draft", index=True
+    )
+    created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    received_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
+    received_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    completed_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    source_warehouse: Mapped[Warehouse] = relationship(
+        foreign_keys=[source_warehouse_id], lazy="selectin"
+    )
+    destination_warehouse: Mapped[Warehouse] = relationship(
+        foreign_keys=[destination_warehouse_id], lazy="selectin"
+    )
+    item: Mapped[Item] = relationship(lazy="selectin")
+    created_by: Mapped[User] = relationship(
+        foreign_keys=[created_by_id], lazy="selectin"
+    )
+    received_by: Mapped[User | None] = relationship(
+        foreign_keys=[received_by_id], lazy="selectin"
+    )
+    completed_by: Mapped[User | None] = relationship(
+        foreign_keys=[completed_by_id], lazy="selectin"
+    )
+    movements: Mapped[list[InventoryMovement]] = relationship(
+        back_populates="transfer"
+    )
+    serials: Mapped[list["TransferSerial"]] = relationship(
+        back_populates="transfer", cascade="all, delete-orphan", lazy="selectin"
+    )
+
+
+class TransferSerial(Base):
+    __tablename__ = "transfer_serials"
+    __table_args__ = (
+        UniqueConstraint("transfer_id", "serial_id", name="uq_transfer_serial"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    transfer_id: Mapped[int] = mapped_column(
+        ForeignKey("stock_transfers.id", ondelete="CASCADE"), index=True
+    )
+    serial_id: Mapped[int] = mapped_column(
+        ForeignKey("inventory_serials.id"), index=True
+    )
+    serial_number: Mapped[str] = mapped_column(String(160))
+    transfer: Mapped[StockTransfer] = relationship(back_populates="serials")
+    serial: Mapped[InventorySerial] = relationship(lazy="selectin")
+
+
+class Stocktake(Base):
+    __tablename__ = "stocktakes"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    stocktake_number: Mapped[str] = mapped_column(String(40), unique=True)
+    stocktake_type: Mapped[str] = mapped_column(String(20))
+    warehouse_id: Mapped[int] = mapped_column(ForeignKey("warehouses.id"), index=True)
+    stocktake_date: Mapped[date] = mapped_column(Date, nullable=False)
+    status: Mapped[str] = mapped_column(
+        String(20), default="draft", server_default="draft", index=True
+    )
+    notes: Mapped[str] = mapped_column(String(500), default="")
+    created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    completed_by_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    warehouse: Mapped[Warehouse] = relationship(lazy="selectin")
+    created_by: Mapped[User] = relationship(
+        foreign_keys=[created_by_id], lazy="selectin"
+    )
+    completed_by: Mapped[User | None] = relationship(
+        foreign_keys=[completed_by_id], lazy="selectin"
+    )
+    lines: Mapped[list["StocktakeLine"]] = relationship(
+        back_populates="stocktake", cascade="all, delete-orphan", lazy="selectin"
+    )
+
+
+class StocktakeLine(Base):
+    __tablename__ = "stocktake_lines"
+    __table_args__ = (
+        UniqueConstraint("stocktake_id", "item_id", name="uq_stocktake_item"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    stocktake_id: Mapped[int] = mapped_column(
+        ForeignKey("stocktakes.id", ondelete="CASCADE"), index=True
+    )
+    item_id: Mapped[int] = mapped_column(ForeignKey("items.id"), index=True)
+    warehouse_id: Mapped[int] = mapped_column(ForeignKey("warehouses.id"), index=True)
+    system_quantity: Mapped[float] = mapped_column(Float)
+    actual_quantity: Mapped[float | None] = mapped_column(Float, nullable=True)
+    difference: Mapped[float | None] = mapped_column(Float, nullable=True)
+    stocktake: Mapped[Stocktake] = relationship(back_populates="lines")
+    item: Mapped[Item] = relationship(lazy="selectin")
+    warehouse: Mapped[Warehouse] = relationship(lazy="selectin")

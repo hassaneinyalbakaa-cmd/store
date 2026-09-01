@@ -21,6 +21,8 @@ import ReceiptsPage from '@/pages/receipts';
 import InventoryPage from '@/pages/inventory';
 import IssueRequestsPage from '@/pages/issue-requests';
 import IssueVouchersPage from '@/pages/issue-vouchers';
+import TransfersPage from '@/pages/transfers';
+import StocktakesPage, { StocktakeAdjustmentsPage } from '@/pages/stocktakes';
 import NotFound from '@/pages/not-found';
 import {
   Route,
@@ -60,6 +62,9 @@ function Router({ user }: { user: SessionUser | null }) {
         <Route path="/issue-requests">{() => user ? <Protected user={user} permission="issue_requests:read"><IssueRequestsPage user={user} /></Protected> : <LoginPage />}</Route>
         <Route path="/issue-vouchers">{() => user ? <Protected user={user} permission="issues:read"><IssueVouchersPage /></Protected> : <LoginPage />}</Route>
         <Route path="/issue-vouchers/:id">{() => user ? <Protected user={user} permission="issues:read"><IssueVouchersPage /></Protected> : <LoginPage />}</Route>
+        <Route path="/transfers">{() => user ? <Protected user={user} permission="transfers:read"><TransfersPage user={user} /></Protected> : <LoginPage />}</Route>
+        <Route path="/stocktakes">{() => user ? <Protected user={user} permission="stocktakes:read"><StocktakesPage user={user} /></Protected> : <LoginPage />}</Route>
+        <Route path="/stocktake-adjustments">{() => user ? <Protected user={user} permission="stocktakes:read"><StocktakeAdjustmentsPage /></Protected> : <LoginPage />}</Route>
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

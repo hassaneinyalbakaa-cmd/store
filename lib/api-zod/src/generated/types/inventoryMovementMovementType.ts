@@ -13,4 +13,7 @@ export const InventoryMovementMovementType = {
   opening: 'opening',
   receipt: 'receipt',
   issue: 'issue',
+  transfer_out: 'transfer_out',
+  transfer_in: 'transfer_in',
+  adjustment: 'adjustment',
 } as const;

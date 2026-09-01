@@ -48,6 +48,15 @@ import type {
   ReceiptInput,
   Role,
   SessionUser,
+  StockTransfer,
+  StockTransferInput,
+  StockTransferPreview,
+  StockTransferReceiveInput,
+  Stocktake,
+  StocktakeAdjustment,
+  StocktakeCountInput,
+  StocktakeInput,
+  StocktakeLine,
   User,
   UserInput,
   UserUpdate,
@@ -2833,6 +2842,969 @@ export function useGetIssueVoucher<TData = Awaited<ReturnType<typeof getIssueVou
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetIssueVoucherQueryOptions(voucherId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListTransfersUrl = () => {
+
+
+
+
+  return `/api/transfers`
+}
+
+/**
+ * @summary List warehouse transfers
+ */
+export const listTransfers = async ( options?: Parameters<typeof customFetch>[1]): Promise<StockTransfer[]> => {
+
+  return customFetch<StockTransfer[]>(getListTransfersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListTransfersQueryKey = () => {
+    return [
+    `/api/transfers`
+    ] as const;
+    }
+
+
+export const getListTransfersQueryOptions = <TData = Awaited<ReturnType<typeof listTransfers>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTransfers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListTransfersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listTransfers>>> = ({ signal }) => listTransfers({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listTransfers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListTransfersQueryResult = NonNullable<Awaited<ReturnType<typeof listTransfers>>>
+export type ListTransfersQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List warehouse transfers
+ */
+
+export function useListTransfers<TData = Awaited<ReturnType<typeof listTransfers>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTransfers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListTransfersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateTransferUrl = () => {
+
+
+
+
+  return `/api/transfers`
+}
+
+/**
+ * @summary Create a draft warehouse transfer
+ */
+export const createTransfer = async (stockTransferInput: StockTransferInput, options?: Parameters<typeof customFetch>[1]): Promise<StockTransfer> => {
+
+  return customFetch<StockTransfer>(getCreateTransferUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(stockTransferInput)
+  }
+);}
+
+
+
+
+
+export const getCreateTransferMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTransfer>>, TError,{data: BodyType<StockTransferInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createTransfer>>, TError,{data: BodyType<StockTransferInput>}, TContext> => {
+
+const mutationKey = ['createTransfer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTransfer>>, {data: BodyType<StockTransferInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTransfer(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTransferMutationResult = NonNullable<Awaited<ReturnType<typeof createTransfer>>>
+    export type CreateTransferMutationBody = BodyType<StockTransferInput>
+    export type CreateTransferMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Create a draft warehouse transfer
+ */
+export const useCreateTransfer = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTransfer>>, TError,{data: BodyType<StockTransferInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createTransfer>>,
+        TError,
+        {data: BodyType<StockTransferInput>},
+        TContext
+      > => {
+      return useMutation(getCreateTransferMutationOptions(options));
+    }
+
+export const getGetTransferUrl = (transferId: number,) => {
+
+
+
+
+  return `/api/transfers/${transferId}`
+}
+
+/**
+ * @summary Get a warehouse transfer
+ */
+export const getTransfer = async (transferId: number, options?: Parameters<typeof customFetch>[1]): Promise<StockTransfer> => {
+
+  return customFetch<StockTransfer>(getGetTransferUrl(transferId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTransferQueryKey = (transferId: number,) => {
+    return [
+    `/api/transfers/${transferId}`
+    ] as const;
+    }
+
+
+export const getGetTransferQueryOptions = <TData = Awaited<ReturnType<typeof getTransfer>>, TError = ErrorType<ErrorResponse>>(transferId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTransfer>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTransferQueryKey(transferId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTransfer>>> = ({ signal }) => getTransfer(transferId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: transferId !== null && transferId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTransfer>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTransferQueryResult = NonNullable<Awaited<ReturnType<typeof getTransfer>>>
+export type GetTransferQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get a warehouse transfer
+ */
+
+export function useGetTransfer<TData = Awaited<ReturnType<typeof getTransfer>>, TError = ErrorType<ErrorResponse>>(
+ transferId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTransfer>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTransferQueryOptions(transferId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSendTransferUrl = (transferId: number,) => {
+
+
+
+
+  return `/api/transfers/${transferId}/send`
+}
+
+/**
+ * @summary Send a draft warehouse transfer
+ */
+export const sendTransfer = async (transferId: number, options?: Parameters<typeof customFetch>[1]): Promise<StockTransfer> => {
+
+  return customFetch<StockTransfer>(getSendTransferUrl(transferId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSendTransferMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendTransfer>>, TError,{transferId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendTransfer>>, TError,{transferId: number}, TContext> => {
+
+const mutationKey = ['sendTransfer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendTransfer>>, {transferId: number}> = (props) => {
+          const {transferId} = props ?? {};
+
+          return  sendTransfer(transferId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendTransferMutationResult = NonNullable<Awaited<ReturnType<typeof sendTransfer>>>
+
+    export type SendTransferMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Send a draft warehouse transfer
+ */
+export const useSendTransfer = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendTransfer>>, TError,{transferId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof sendTransfer>>,
+        TError,
+        {transferId: number},
+        TContext
+      > => {
+      return useMutation(getSendTransferMutationOptions(options));
+    }
+
+export const getGetTransferReceivePreviewUrl = (transferId: number,) => {
+
+
+
+
+  return `/api/transfers/${transferId}/receive-preview`
+}
+
+/**
+ * @summary Preview stock and serials before receiving a transfer
+ */
+export const getTransferReceivePreview = async (transferId: number, options?: Parameters<typeof customFetch>[1]): Promise<StockTransferPreview> => {
+
+  return customFetch<StockTransferPreview>(getGetTransferReceivePreviewUrl(transferId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTransferReceivePreviewQueryKey = (transferId: number,) => {
+    return [
+    `/api/transfers/${transferId}/receive-preview`
+    ] as const;
+    }
+
+
+export const getGetTransferReceivePreviewQueryOptions = <TData = Awaited<ReturnType<typeof getTransferReceivePreview>>, TError = ErrorType<ErrorResponse>>(transferId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTransferReceivePreview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTransferReceivePreviewQueryKey(transferId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTransferReceivePreview>>> = ({ signal }) => getTransferReceivePreview(transferId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: transferId !== null && transferId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTransferReceivePreview>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTransferReceivePreviewQueryResult = NonNullable<Awaited<ReturnType<typeof getTransferReceivePreview>>>
+export type GetTransferReceivePreviewQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Preview stock and serials before receiving a transfer
+ */
+
+export function useGetTransferReceivePreview<TData = Awaited<ReturnType<typeof getTransferReceivePreview>>, TError = ErrorType<ErrorResponse>>(
+ transferId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTransferReceivePreview>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTransferReceivePreviewQueryOptions(transferId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getReceiveTransferUrl = (transferId: number,) => {
+
+
+
+
+  return `/api/transfers/${transferId}/receive`
+}
+
+/**
+ * @summary Confirm receipt and update both warehouse balances
+ */
+export const receiveTransfer = async (transferId: number,
+    stockTransferReceiveInput: StockTransferReceiveInput, options?: Parameters<typeof customFetch>[1]): Promise<StockTransfer> => {
+
+  return customFetch<StockTransfer>(getReceiveTransferUrl(transferId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(stockTransferReceiveInput)
+  }
+);}
+
+
+
+
+
+export const getReceiveTransferMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveTransfer>>, TError,{transferId: number;data: BodyType<StockTransferReceiveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof receiveTransfer>>, TError,{transferId: number;data: BodyType<StockTransferReceiveInput>}, TContext> => {
+
+const mutationKey = ['receiveTransfer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof receiveTransfer>>, {transferId: number;data: BodyType<StockTransferReceiveInput>}> = (props) => {
+          const {transferId,data} = props ?? {};
+
+          return  receiveTransfer(transferId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReceiveTransferMutationResult = NonNullable<Awaited<ReturnType<typeof receiveTransfer>>>
+    export type ReceiveTransferMutationBody = BodyType<StockTransferReceiveInput>
+    export type ReceiveTransferMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Confirm receipt and update both warehouse balances
+ */
+export const useReceiveTransfer = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof receiveTransfer>>, TError,{transferId: number;data: BodyType<StockTransferReceiveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof receiveTransfer>>,
+        TError,
+        {transferId: number;data: BodyType<StockTransferReceiveInput>},
+        TContext
+      > => {
+      return useMutation(getReceiveTransferMutationOptions(options));
+    }
+
+export const getCompleteTransferUrl = (transferId: number,) => {
+
+
+
+
+  return `/api/transfers/${transferId}/complete`
+}
+
+/**
+ * @summary Complete a received warehouse transfer
+ */
+export const completeTransfer = async (transferId: number, options?: Parameters<typeof customFetch>[1]): Promise<StockTransfer> => {
+
+  return customFetch<StockTransfer>(getCompleteTransferUrl(transferId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCompleteTransferMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeTransfer>>, TError,{transferId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof completeTransfer>>, TError,{transferId: number}, TContext> => {
+
+const mutationKey = ['completeTransfer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeTransfer>>, {transferId: number}> = (props) => {
+          const {transferId} = props ?? {};
+
+          return  completeTransfer(transferId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CompleteTransferMutationResult = NonNullable<Awaited<ReturnType<typeof completeTransfer>>>
+
+    export type CompleteTransferMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Complete a received warehouse transfer
+ */
+export const useCompleteTransfer = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeTransfer>>, TError,{transferId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof completeTransfer>>,
+        TError,
+        {transferId: number},
+        TContext
+      > => {
+      return useMutation(getCompleteTransferMutationOptions(options));
+    }
+
+export const getListStocktakesUrl = () => {
+
+
+
+
+  return `/api/stocktakes`
+}
+
+/**
+ * @summary List stocktakes
+ */
+export const listStocktakes = async ( options?: Parameters<typeof customFetch>[1]): Promise<Stocktake[]> => {
+
+  return customFetch<Stocktake[]>(getListStocktakesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListStocktakesQueryKey = () => {
+    return [
+    `/api/stocktakes`
+    ] as const;
+    }
+
+
+export const getListStocktakesQueryOptions = <TData = Awaited<ReturnType<typeof listStocktakes>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStocktakes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListStocktakesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStocktakes>>> = ({ signal }) => listStocktakes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStocktakes>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListStocktakesQueryResult = NonNullable<Awaited<ReturnType<typeof listStocktakes>>>
+export type ListStocktakesQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List stocktakes
+ */
+
+export function useListStocktakes<TData = Awaited<ReturnType<typeof listStocktakes>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStocktakes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListStocktakesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateStocktakeUrl = () => {
+
+
+
+
+  return `/api/stocktakes`
+}
+
+/**
+ * @summary Create a full or partial stocktake
+ */
+export const createStocktake = async (stocktakeInput: StocktakeInput, options?: Parameters<typeof customFetch>[1]): Promise<Stocktake> => {
+
+  return customFetch<Stocktake>(getCreateStocktakeUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(stocktakeInput)
+  }
+);}
+
+
+
+
+
+export const getCreateStocktakeMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStocktake>>, TError,{data: BodyType<StocktakeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStocktake>>, TError,{data: BodyType<StocktakeInput>}, TContext> => {
+
+const mutationKey = ['createStocktake'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStocktake>>, {data: BodyType<StocktakeInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createStocktake(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateStocktakeMutationResult = NonNullable<Awaited<ReturnType<typeof createStocktake>>>
+    export type CreateStocktakeMutationBody = BodyType<StocktakeInput>
+    export type CreateStocktakeMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Create a full or partial stocktake
+ */
+export const useCreateStocktake = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStocktake>>, TError,{data: BodyType<StocktakeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createStocktake>>,
+        TError,
+        {data: BodyType<StocktakeInput>},
+        TContext
+      > => {
+      return useMutation(getCreateStocktakeMutationOptions(options));
+    }
+
+export const getGetStocktakeUrl = (stocktakeId: number,) => {
+
+
+
+
+  return `/api/stocktakes/${stocktakeId}`
+}
+
+/**
+ * @summary Get a stocktake with count lines
+ */
+export const getStocktake = async (stocktakeId: number, options?: Parameters<typeof customFetch>[1]): Promise<Stocktake> => {
+
+  return customFetch<Stocktake>(getGetStocktakeUrl(stocktakeId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStocktakeQueryKey = (stocktakeId: number,) => {
+    return [
+    `/api/stocktakes/${stocktakeId}`
+    ] as const;
+    }
+
+
+export const getGetStocktakeQueryOptions = <TData = Awaited<ReturnType<typeof getStocktake>>, TError = ErrorType<ErrorResponse>>(stocktakeId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStocktake>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStocktakeQueryKey(stocktakeId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStocktake>>> = ({ signal }) => getStocktake(stocktakeId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: stocktakeId !== null && stocktakeId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStocktake>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStocktakeQueryResult = NonNullable<Awaited<ReturnType<typeof getStocktake>>>
+export type GetStocktakeQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary Get a stocktake with count lines
+ */
+
+export function useGetStocktake<TData = Awaited<ReturnType<typeof getStocktake>>, TError = ErrorType<ErrorResponse>>(
+ stocktakeId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStocktake>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStocktakeQueryOptions(stocktakeId,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCountStocktakeLineUrl = (stocktakeId: number,
+    lineId: number,) => {
+
+
+
+
+  return `/api/stocktakes/${stocktakeId}/lines/${lineId}/count`
+}
+
+/**
+ * @summary Record the physical quantity for a stocktake line
+ */
+export const countStocktakeLine = async (stocktakeId: number,
+    lineId: number,
+    stocktakeCountInput: StocktakeCountInput, options?: Parameters<typeof customFetch>[1]): Promise<StocktakeLine> => {
+
+  return customFetch<StocktakeLine>(getCountStocktakeLineUrl(stocktakeId,lineId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(stocktakeCountInput)
+  }
+);}
+
+
+
+
+
+export const getCountStocktakeLineMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof countStocktakeLine>>, TError,{stocktakeId: number;lineId: number;data: BodyType<StocktakeCountInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof countStocktakeLine>>, TError,{stocktakeId: number;lineId: number;data: BodyType<StocktakeCountInput>}, TContext> => {
+
+const mutationKey = ['countStocktakeLine'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof countStocktakeLine>>, {stocktakeId: number;lineId: number;data: BodyType<StocktakeCountInput>}> = (props) => {
+          const {stocktakeId,lineId,data} = props ?? {};
+
+          return  countStocktakeLine(stocktakeId,lineId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CountStocktakeLineMutationResult = NonNullable<Awaited<ReturnType<typeof countStocktakeLine>>>
+    export type CountStocktakeLineMutationBody = BodyType<StocktakeCountInput>
+    export type CountStocktakeLineMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Record the physical quantity for a stocktake line
+ */
+export const useCountStocktakeLine = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof countStocktakeLine>>, TError,{stocktakeId: number;lineId: number;data: BodyType<StocktakeCountInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof countStocktakeLine>>,
+        TError,
+        {stocktakeId: number;lineId: number;data: BodyType<StocktakeCountInput>},
+        TContext
+      > => {
+      return useMutation(getCountStocktakeLineMutationOptions(options));
+    }
+
+export const getCompleteStocktakeUrl = (stocktakeId: number,) => {
+
+
+
+
+  return `/api/stocktakes/${stocktakeId}/complete`
+}
+
+/**
+ * @summary Complete a stocktake and create adjustment movements
+ */
+export const completeStocktake = async (stocktakeId: number, options?: Parameters<typeof customFetch>[1]): Promise<Stocktake> => {
+
+  return customFetch<Stocktake>(getCompleteStocktakeUrl(stocktakeId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCompleteStocktakeMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeStocktake>>, TError,{stocktakeId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof completeStocktake>>, TError,{stocktakeId: number}, TContext> => {
+
+const mutationKey = ['completeStocktake'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeStocktake>>, {stocktakeId: number}> = (props) => {
+          const {stocktakeId} = props ?? {};
+
+          return  completeStocktake(stocktakeId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CompleteStocktakeMutationResult = NonNullable<Awaited<ReturnType<typeof completeStocktake>>>
+
+    export type CompleteStocktakeMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Complete a stocktake and create adjustment movements
+ */
+export const useCompleteStocktake = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeStocktake>>, TError,{stocktakeId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof completeStocktake>>,
+        TError,
+        {stocktakeId: number},
+        TContext
+      > => {
+      return useMutation(getCompleteStocktakeMutationOptions(options));
+    }
+
+export const getListStocktakeAdjustmentsUrl = () => {
+
+
+
+
+  return `/api/stocktake-adjustments`
+}
+
+/**
+ * @summary List stocktake adjustment movements
+ */
+export const listStocktakeAdjustments = async ( options?: Parameters<typeof customFetch>[1]): Promise<StocktakeAdjustment[]> => {
+
+  return customFetch<StocktakeAdjustment[]>(getListStocktakeAdjustmentsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListStocktakeAdjustmentsQueryKey = () => {
+    return [
+    `/api/stocktake-adjustments`
+    ] as const;
+    }
+
+
+export const getListStocktakeAdjustmentsQueryOptions = <TData = Awaited<ReturnType<typeof listStocktakeAdjustments>>, TError = ErrorType<ErrorResponse>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStocktakeAdjustments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListStocktakeAdjustmentsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStocktakeAdjustments>>> = ({ signal }) => listStocktakeAdjustments({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStocktakeAdjustments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListStocktakeAdjustmentsQueryResult = NonNullable<Awaited<ReturnType<typeof listStocktakeAdjustments>>>
+export type ListStocktakeAdjustmentsQueryError = ErrorType<ErrorResponse>
+
+
+/**
+ * @summary List stocktake adjustment movements
+ */
+
+export function useListStocktakeAdjustments<TData = Awaited<ReturnType<typeof listStocktakeAdjustments>>, TError = ErrorType<ErrorResponse>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listStocktakeAdjustments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListStocktakeAdjustmentsQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
