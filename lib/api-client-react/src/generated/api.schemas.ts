@@ -614,6 +614,61 @@ export interface StocktakeAdjustment {
   created_at: string;
 }
 
+export type ReportType = typeof ReportType[keyof typeof ReportType];
+
+
+export const ReportType = {
+  'inventory-balance': 'inventory-balance',
+  'item-movements': 'item-movements',
+  receipts: 'receipts',
+  issues: 'issues',
+  transfers: 'transfers',
+  stocktakes: 'stocktakes',
+  'low-stock': 'low-stock',
+  expiring: 'expiring',
+  'issues-by-department': 'issues-by-department',
+} as const;
+
+export interface ReportColumn {
+  key: string;
+  label: string;
+}
+
+export type ReportResponseRowsItem = { [key: string]: unknown };
+
+export interface ReportResponse {
+  report_type: ReportType;
+  title: string;
+  columns: ReportColumn[];
+  rows: ReportResponseRowsItem[];
+  generated_at: string;
+  row_count: number;
+}
+
+export interface AuditLog {
+  id: number;
+  /** @nullable */
+  user_id: number | null;
+  username: string;
+  user_name: string;
+  action: string;
+  action_label: string;
+  /** @nullable */
+  document_number: string | null;
+  details: string;
+  created_at: string;
+}
+
+export interface BackupInfo {
+  id: number;
+  filename: string;
+  size_bytes: number;
+  created_by_id: number;
+  created_by_name: string;
+  created_at: string;
+  download_url: string;
+}
+
 export interface DashboardSummary {
   users_total: number;
   active_users: number;
@@ -633,5 +688,64 @@ export type ListInventoryExpiryParams = {
  * @maximum 90
  */
 withinDays?: number;
+};
+
+export type GetReportParams = {
+search?: string;
+warehouse_id?: number;
+department_id?: number;
+item_id?: number;
+date_from?: string;
+date_to?: string;
+/**
+ * @minimum 1
+ * @maximum 3650
+ */
+expiry_days?: number;
+/**
+ * @minimum 1
+ * @maximum 5000
+ */
+limit?: number;
+};
+
+export type ExportReportParams = {
+format: ExportReportFormat;
+search?: string;
+warehouse_id?: number;
+department_id?: number;
+item_id?: number;
+date_from?: string;
+date_to?: string;
+/**
+ * @minimum 1
+ * @maximum 3650
+ */
+expiry_days?: number;
+/**
+ * @minimum 1
+ * @maximum 5000
+ */
+limit?: number;
+};
+
+export type ExportReportFormat = typeof ExportReportFormat[keyof typeof ExportReportFormat];
+
+
+export const ExportReportFormat = {
+  pdf: 'pdf',
+  xlsx: 'xlsx',
+} as const;
+
+export type ListAuditLogsParams = {
+search?: string;
+action?: string;
+date_from?: string;
+date_to?: string;
+/**
+ * @minimum 1
+ * @maximum 5000
+ */
+limit?: number;
 };
 

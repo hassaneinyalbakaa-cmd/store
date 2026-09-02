@@ -7,11 +7,14 @@ from .config import get_settings
 from .routes import (
     access,
     auth,
+    audit_logs,
+    backups,
     catalog,
     dashboard,
     health,
     inventory,
     issue_requests,
+    reports,
     stocktakes,
     transfers,
     users,
@@ -49,3 +52,6 @@ app.include_router(inventory.router, prefix="/api")
 app.include_router(issue_requests.router, prefix="/api")
 app.include_router(transfers.router, prefix="/api")
 app.include_router(stocktakes.router, prefix="/api")
+app.include_router(reports.router, prefix="/api")
+app.include_router(audit_logs.router, prefix="/api")
+app.include_router(backups.router, prefix="/api")

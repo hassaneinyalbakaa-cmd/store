@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..config import get_settings
+from ..audit import add_audit_log
 from ..db import get_db
 from ..dependencies import current_user
 from ..models import Role, User
@@ -25,12 +26,22 @@ async def login(
     )
     user = result.scalar_one_or_none()
     if not user or not user.is_active or not verify_password(payload.password, user.password_hash):
+        add_audit_log(
+            db,
+            user=None,
+            action="login_failed",
+            details=f"اسم المستخدم: {payload.username.strip().lower()[:80]}",
+            username=payload.username.strip().lower()[:80],
+        )
+        await db.commit()
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="اسم المستخدم أو كلمة المرور غير صحيحة",
         )
 
     token = await create_session(db, user)
+    add_audit_log(db, user=user, action="login", details="تم إنشاء جلسة جديدة")
+    await db.commit()
     settings = get_settings()
     response.set_cookie(
         key=settings.session_cookie_name,

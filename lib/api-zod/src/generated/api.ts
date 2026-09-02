@@ -1546,3 +1546,141 @@ export const ListStocktakeAdjustmentsResponseItem = zod.object({
 export const ListStocktakeAdjustmentsResponse = zod.array(ListStocktakeAdjustmentsResponseItem)
 
 
+/**
+ * @summary Get a filtered operational report
+ */
+export const GetReportParams = zod.object({
+  "reportType": zod.enum(['inventory-balance', 'item-movements', 'receipts', 'issues', 'transfers', 'stocktakes', 'low-stock', 'expiring', 'issues-by-department'])
+})
+
+export const getReportQueryExpiryDaysDefault = 30;
+export const getReportQueryExpiryDaysMax = 3650;
+
+export const getReportQueryLimitDefault = 1000;
+export const getReportQueryLimitMax = 5000;
+
+
+
+export const GetReportQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "warehouse_id": zod.coerce.number().optional(),
+  "department_id": zod.coerce.number().optional(),
+  "item_id": zod.coerce.number().optional(),
+  "date_from": zod.date().optional(),
+  "date_to": zod.date().optional(),
+  "expiry_days": zod.coerce.number().min(1).max(getReportQueryExpiryDaysMax).default(getReportQueryExpiryDaysDefault),
+  "limit": zod.coerce.number().min(1).max(getReportQueryLimitMax).default(getReportQueryLimitDefault)
+})
+
+export const GetReportResponse = zod.object({
+  "report_type": zod.enum(['inventory-balance', 'item-movements', 'receipts', 'issues', 'transfers', 'stocktakes', 'low-stock', 'expiring', 'issues-by-department']),
+  "title": zod.string(),
+  "columns": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string()
+})),
+  "rows": zod.array(zod.record(zod.string(), zod.unknown())),
+  "generated_at": zod.coerce.date(),
+  "row_count": zod.number()
+})
+
+
+/**
+ * @summary Export a filtered report as PDF or Excel
+ */
+export const ExportReportParams = zod.object({
+  "reportType": zod.enum(['inventory-balance', 'item-movements', 'receipts', 'issues', 'transfers', 'stocktakes', 'low-stock', 'expiring', 'issues-by-department'])
+})
+
+export const exportReportQueryExpiryDaysDefault = 30;
+export const exportReportQueryExpiryDaysMax = 3650;
+
+export const exportReportQueryLimitDefault = 1000;
+export const exportReportQueryLimitMax = 5000;
+
+
+
+export const ExportReportQueryParams = zod.object({
+  "format": zod.enum(['pdf', 'xlsx']),
+  "search": zod.coerce.string().optional(),
+  "warehouse_id": zod.coerce.number().optional(),
+  "department_id": zod.coerce.number().optional(),
+  "item_id": zod.coerce.number().optional(),
+  "date_from": zod.date().optional(),
+  "date_to": zod.date().optional(),
+  "expiry_days": zod.coerce.number().min(1).max(exportReportQueryExpiryDaysMax).default(exportReportQueryExpiryDaysDefault),
+  "limit": zod.coerce.number().min(1).max(exportReportQueryLimitMax).default(exportReportQueryLimitDefault)
+})
+
+export const ExportReportResponse = zod.unknown()
+
+
+/**
+ * @summary List immutable audit log entries
+ */
+export const listAuditLogsQueryLimitDefault = 1000;
+export const listAuditLogsQueryLimitMax = 5000;
+
+
+
+export const ListAuditLogsQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "action": zod.coerce.string().optional(),
+  "date_from": zod.date().optional(),
+  "date_to": zod.date().optional(),
+  "limit": zod.coerce.number().min(1).max(listAuditLogsQueryLimitMax).default(listAuditLogsQueryLimitDefault)
+})
+
+export const ListAuditLogsResponseItem = zod.object({
+  "id": zod.number(),
+  "user_id": zod.number().nullable(),
+  "username": zod.string(),
+  "user_name": zod.string(),
+  "action": zod.string(),
+  "action_label": zod.string(),
+  "document_number": zod.string().nullable(),
+  "details": zod.string(),
+  "created_at": zod.coerce.date()
+})
+export const ListAuditLogsResponse = zod.array(ListAuditLogsResponseItem)
+
+
+/**
+ * @summary List local database backups
+ */
+export const ListBackupsResponseItem = zod.object({
+  "id": zod.number(),
+  "filename": zod.string(),
+  "size_bytes": zod.number(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "created_at": zod.coerce.date(),
+  "download_url": zod.string()
+})
+export const ListBackupsResponse = zod.array(ListBackupsResponseItem)
+
+
+/**
+ * @summary Create a local database backup
+ */
+export const CreateBackupResponse = zod.object({
+  "id": zod.number(),
+  "filename": zod.string(),
+  "size_bytes": zod.number(),
+  "created_by_id": zod.number(),
+  "created_by_name": zod.string(),
+  "created_at": zod.coerce.date(),
+  "download_url": zod.string()
+})
+
+
+/**
+ * @summary Download a local database backup
+ */
+export const DownloadBackupParams = zod.object({
+  "backupId": zod.coerce.number()
+})
+
+export const DownloadBackupResponse = zod.unknown()
+
+

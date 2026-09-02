@@ -474,3 +474,39 @@ class StocktakeAdjustment(BaseModel):
     quantity: float
     movement_date: date
     created_at: datetime
+
+
+class ReportColumn(BaseModel):
+    key: str
+    label: str
+
+
+class ReportResponse(BaseModel):
+    report_type: str
+    title: str
+    columns: list[ReportColumn]
+    rows: list[dict[str, object]]
+    generated_at: datetime
+    row_count: int
+
+
+class AuditLog(BaseModel):
+    id: int
+    user_id: int | None
+    username: str
+    user_name: str
+    action: str
+    action_label: str
+    document_number: str | None
+    details: str
+    created_at: datetime
+
+
+class BackupInfo(BaseModel):
+    id: int
+    filename: str
+    size_bytes: int
+    created_by_id: int
+    created_by_name: str
+    created_at: datetime
+    download_url: str

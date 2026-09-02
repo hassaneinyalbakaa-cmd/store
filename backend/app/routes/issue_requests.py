@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..db import get_db
+from ..audit import add_audit_log
 from ..dependencies import require_permission
 from ..models import (
     Department,
@@ -188,6 +189,13 @@ async def create_issue_request(
     await db.flush()
     issue_request.request_number = f"REQ-{payload.request_date.year}-{issue_request.id:06d}"
     try:
+        add_audit_log(
+            db,
+            user=user,
+            action="issue",
+            document_number=voucher.issue_number,
+            details=f"القسم: {request.department.name}، الكمية: {request.quantity:g}",
+        )
         await db.commit()
     except IntegrityError:
         await db.rollback()

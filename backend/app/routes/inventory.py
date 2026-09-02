@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..db import get_db
+from ..audit import add_audit_log
 from ..dependencies import require_permission
 from ..models import (
     InventoryMovement,
@@ -181,7 +182,7 @@ async def get_receipt_route(
 )
 async def create_receipt(
     payload: ReceiptInput,
-    _: User = Depends(require_permission("receipts:write")),
+    user: User = Depends(require_permission("receipts:write")),
     db: AsyncSession = Depends(get_db),
 ) -> ReceiptSchema:
     validated_details = []
@@ -253,6 +254,13 @@ async def create_receipt(
                 )
             )
     try:
+        add_audit_log(
+            db,
+            user=user,
+            action="receipt",
+            document_number=receipt.receipt_number,
+            details=f"عدد البنود: {len(validated_details)}",
+        )
         await db.commit()
     except IntegrityError:
         await db.rollback()

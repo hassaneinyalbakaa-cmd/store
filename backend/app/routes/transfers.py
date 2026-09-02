@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..db import get_db
+from ..audit import add_audit_log
 from ..dependencies import require_permission
 from ..models import (
     InventoryMovement,
@@ -164,6 +165,16 @@ async def create_transfer(
     await db.flush()
     transfer.transfer_number = f"TRF-{datetime.now(timezone.utc).year}-{transfer.id:06d}"
     try:
+        add_audit_log(
+            db,
+            user=user,
+            action="transfer",
+            document_number=transfer.transfer_number,
+            details=(
+                f"استلام من {transfer.source_warehouse.name} إلى "
+                f"{transfer.destination_warehouse.name}"
+            ),
+        )
         await db.commit()
     except IntegrityError:
         await db.rollback()
@@ -344,6 +355,13 @@ async def complete_transfer(
     transfer.completed_by_id = user.id
     transfer.completed_by = user
     transfer.completed_at = datetime.now(timezone.utc)
+    add_audit_log(
+        db,
+        user=user,
+        action="transfer",
+        document_number=transfer.transfer_number,
+        details="تم إكمال دورة التحويل بعد تأكيد الاستلام",
+    )
     await db.commit()
     saved = await load_transfer(db, transfer.id)
     return await serialize_transfer(db, saved)

@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     session_cookie_name: str = "warehouse_session"
     session_ttl_hours: int = 8
     cors_origins: str = ""
+    backup_directory: str = "/tmp/warehouse-management-backups"
 
     model_config = SettingsConfigDict(
         env_file=".env",

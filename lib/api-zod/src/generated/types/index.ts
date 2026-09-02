@@ -6,11 +6,16 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './auditLog';
+export * from './backupInfo';
 export * from './dashboardSummary';
 export * from './department';
 export * from './departmentInput';
 export * from './departmentUpdate';
 export * from './errorResponse';
+export * from './exportReportFormat';
+export * from './exportReportParams';
+export * from './getReportParams';
 export * from './healthStatus';
 export * from './inventoryBalance';
 export * from './inventoryExpiry';
@@ -27,6 +32,7 @@ export * from './issueVoucher';
 export * from './item';
 export * from './itemInput';
 export * from './itemUpdate';
+export * from './listAuditLogsParams';
 export * from './listInventoryExpiryParams';
 export * from './listItemsParams';
 export * from './loginInput';
@@ -37,6 +43,10 @@ export * from './receipt';
 export * from './receiptDetail';
 export * from './receiptDetailInput';
 export * from './receiptInput';
+export * from './reportColumn';
+export * from './reportResponse';
+export * from './reportResponseRowsItem';
+export * from './reportType';
 export * from './role';
 export * from './sessionUser';
 export * from './stocktake';

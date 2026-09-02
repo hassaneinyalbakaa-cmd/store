@@ -32,3 +32,16 @@ def require_permission(permission: str):
         return user
 
     return dependency
+
+
+async def admin_user(user: User = Depends(current_user)) -> User:
+    if not user.role or user.role.name != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="هذا الإجراء متاح لمدير النظام فقط",
+        )
+    return user
+
+
+def require_admin():
+    return admin_user

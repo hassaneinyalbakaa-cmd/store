@@ -36,6 +36,12 @@ tags:
     description: Warehouse-to-warehouse stock transfers
   - name: stocktakes
     description: Full and partial stocktakes with adjustment movements
+  - name: reports
+    description: Filterable inventory, movement, and operational reports
+  - name: audit_logs
+    description: Immutable operational audit log
+  - name: backups
+    description: Local database backups restricted to administrators
 paths:
   /healthz:
     get:
@@ -1745,6 +1751,334 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /reports/{reportType}:
+    get:
+      operationId: getReport
+      tags: [reports]
+      summary: Get a filtered operational report
+      parameters:
+        - name: reportType
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ReportType"
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: warehouse_id
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: department_id
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: item_id
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: date_from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: expiry_days
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 3650
+            default: 30
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5000
+            default: 1000
+      responses:
+        "200":
+          description: Report result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportResponse"
+        "400":
+          description: Invalid report or filter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /reports/{reportType}/export:
+    get:
+      operationId: exportReport
+      tags: [reports]
+      summary: Export a filtered report as PDF or Excel
+      parameters:
+        - name: reportType
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ReportType"
+        - name: format
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [pdf, xlsx]
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: warehouse_id
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: department_id
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: item_id
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: date_from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: expiry_days
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 3650
+            default: 30
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5000
+            default: 1000
+      responses:
+        "200":
+          description: Downloadable report
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Invalid report, format, or filter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [audit_logs]
+      summary: List immutable audit log entries
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: action
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: date_from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5000
+            default: 1000
+      responses:
+        "200":
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLog"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /backups:
+    get:
+      operationId: listBackups
+      tags: [backups]
+      summary: List local database backups
+      responses:
+        "200":
+          description: Local database backups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BackupInfo"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Administrator permission required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createBackup
+      tags: [backups]
+      summary: Create a local database backup
+      responses:
+        "201":
+          description: Created local database backup
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BackupInfo"
+        "400":
+          description: Backup could not be created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Administrator permission required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /backups/{backupId}/download:
+    get:
+      operationId: downloadBackup
+      tags: [backups]
+      summary: Download a local database backup
+      parameters:
+        - name: backupId
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Database backup file
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Administrator permission required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Backup not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -2729,6 +3063,81 @@ components:
           type: string
           format: date-time
       required: [movement_id, stocktake_id, stocktake_number, stocktake_line_id, item_id, item_code, item_name, warehouse_id, warehouse_name, quantity, movement_date, created_at]
+    ReportType:
+      type: string
+      enum: [inventory-balance, item-movements, receipts, issues, transfers, stocktakes, low-stock, expiring, issues-by-department]
+    ReportColumn:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+      required: [key, label]
+    ReportResponse:
+      type: object
+      properties:
+        report_type:
+          $ref: "#/components/schemas/ReportType"
+        title:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportColumn"
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        generated_at:
+          type: string
+          format: date-time
+        row_count:
+          type: number
+      required: [report_type, title, columns, rows, generated_at, row_count]
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: number
+        user_id:
+          type: ["number", "null"]
+        username:
+          type: string
+        user_name:
+          type: string
+        action:
+          type: string
+        action_label:
+          type: string
+        document_number:
+          type: ["string", "null"]
+        details:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required: [id, user_id, username, user_name, action, action_label, document_number, details, created_at]
+    BackupInfo:
+      type: object
+      properties:
+        id:
+          type: number
+        filename:
+          type: string
+        size_bytes:
+          type: number
+        created_by_id:
+          type: number
+        created_by_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        download_url:
+          type: string
+      required: [id, filename, size_bytes, created_by_id, created_by_name, created_at, download_url]
     DashboardSummary:
       type: object
       properties:

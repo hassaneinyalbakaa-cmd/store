@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Archive, ArrowLeftRight, Box, Building2, ChevronLeft, ClipboardCheck, ClipboardList, ClipboardPlus, ClipboardPenLine, Layers3, LogOut, Menu, ShieldCheck, Users, Warehouse, X } from 'lucide-react';
+import { Archive, ArrowLeftRight, BarChart3, Box, Building2, ChevronLeft, ClipboardCheck, ClipboardList, ClipboardPlus, ClipboardPenLine, History, Layers3, LogOut, Menu, ShieldCheck, Users, Warehouse, X } from 'lucide-react';
+import { DatabaseBackup } from 'lucide-react';
 import type { SessionUser } from '@workspace/api-client-react';
 import { useLogout } from '@workspace/api-client-react';
 import { getGetCurrentUserQueryKey } from '@workspace/api-client-react';
@@ -20,6 +21,9 @@ const navigation = [
   { href: '/transfers', label: 'تحويلات المخزون', icon: ArrowLeftRight, permission: 'transfers:read' },
   { href: '/stocktakes', label: 'الجرد الفعلي', icon: ClipboardPenLine, permission: 'stocktakes:read' },
   { href: '/stocktake-adjustments', label: 'تسويات الجرد', icon: ClipboardCheck, permission: 'stocktakes:read' },
+  { href: '/reports', label: 'التقارير', icon: BarChart3, permission: 'reports:read' },
+  { href: '/audit-logs', label: 'سجل التدقيق', icon: History, permission: 'audit_logs:read' },
+  { href: '/backups', label: 'النسخ الاحتياطية', icon: DatabaseBackup, permission: 'backups:read' },
 ];
 
 export function AppShell({ user, children }: { user: SessionUser; children: ReactNode }) {

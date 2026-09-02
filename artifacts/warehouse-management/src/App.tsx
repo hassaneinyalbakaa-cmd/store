@@ -23,6 +23,9 @@ import IssueRequestsPage from '@/pages/issue-requests';
 import IssueVouchersPage from '@/pages/issue-vouchers';
 import TransfersPage from '@/pages/transfers';
 import StocktakesPage, { StocktakeAdjustmentsPage } from '@/pages/stocktakes';
+import ReportsPage from '@/pages/reports';
+import AuditLogsPage from '@/pages/audit-logs';
+import BackupsPage from '@/pages/backups';
 import NotFound from '@/pages/not-found';
 import {
   Route,
@@ -65,6 +68,9 @@ function Router({ user }: { user: SessionUser | null }) {
         <Route path="/transfers">{() => user ? <Protected user={user} permission="transfers:read"><TransfersPage user={user} /></Protected> : <LoginPage />}</Route>
         <Route path="/stocktakes">{() => user ? <Protected user={user} permission="stocktakes:read"><StocktakesPage user={user} /></Protected> : <LoginPage />}</Route>
         <Route path="/stocktake-adjustments">{() => user ? <Protected user={user} permission="stocktakes:read"><StocktakeAdjustmentsPage /></Protected> : <LoginPage />}</Route>
+        <Route path="/reports">{() => user ? <Protected user={user} permission="reports:read"><ReportsPage /></Protected> : <LoginPage />}</Route>
+        <Route path="/audit-logs">{() => user ? <Protected user={user} permission="audit_logs:read"><AuditLogsPage /></Protected> : <LoginPage />}</Route>
+        <Route path="/backups">{() => user ? <Protected user={user} permission="backups:read"><BackupsPage canWrite={user.permissions.includes('backups:write')} /></Protected> : <LoginPage />}</Route>
         <Route component={NotFound} />
       </Switch>
     </RoutedErrorBoundary>

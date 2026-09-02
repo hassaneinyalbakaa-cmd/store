@@ -237,6 +237,9 @@ class InventoryMovement(Base):
     transfer: Mapped["StockTransfer | None"] = relationship(
         back_populates="movements"
     )
+    stocktake_line: Mapped["StocktakeLine | None"] = relationship(
+        foreign_keys=[stocktake_line_id], lazy="selectin"
+    )
     serials: Mapped[list["InventorySerial"]] = relationship(
         back_populates="movement", cascade="all, delete-orphan", lazy="selectin"
     )
@@ -461,3 +464,36 @@ class StocktakeLine(Base):
     stocktake: Mapped[Stocktake] = relationship(back_populates="lines")
     item: Mapped[Item] = relationship(lazy="selectin")
     warehouse: Mapped[Warehouse] = relationship(lazy="selectin")
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
+    username: Mapped[str] = mapped_column(String(80))
+    user_name: Mapped[str] = mapped_column(String(160))
+    action: Mapped[str] = mapped_column(String(60), index=True)
+    action_label: Mapped[str] = mapped_column(String(120))
+    document_number: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    details: Mapped[str] = mapped_column(String(500), default="")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), index=True
+    )
+    user: Mapped[User | None] = relationship(lazy="selectin")
+
+
+class BackupRecord(Base):
+    __tablename__ = "backup_records"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    filename: Mapped[str] = mapped_column(String(180), unique=True)
+    file_path: Mapped[str] = mapped_column(String(500))
+    size_bytes: Mapped[int] = mapped_column()
+    created_by_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), index=True
+    )
+    created_by: Mapped[User] = relationship(lazy="selectin")

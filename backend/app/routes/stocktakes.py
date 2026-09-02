@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from ..db import get_db
+from ..audit import add_audit_log
 from ..dependencies import require_permission
 from ..models import (
     InventoryMovement,
@@ -257,9 +258,23 @@ async def complete_stocktake(
                 notes=f"تسوية مرتبطة بالجرد {stocktake.stocktake_number}",
             )
         )
+        add_audit_log(
+            db,
+            user=user,
+            action="adjustment",
+            document_number=stocktake.stocktake_number,
+            details=f"الصنف: {line.item.name}، الفرق: {line.difference:g}",
+        )
     stocktake.status = "completed"
     stocktake.completed_by_id = user.id
     stocktake.completed_at = datetime.now(timezone.utc)
+    add_audit_log(
+        db,
+        user=user,
+        action="stocktake",
+        document_number=stocktake.stocktake_number,
+        details=f"عدد البنود: {len(stocktake.lines)}",
+    )
     await db.commit()
     saved = await load_stocktake(db, stocktake.id)
     return await serialize_stocktake(db, saved)

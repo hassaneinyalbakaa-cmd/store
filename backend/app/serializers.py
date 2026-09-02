@@ -7,6 +7,8 @@ from .models import (
     Receipt,
     ReceiptDetail,
     Role,
+    AuditLog,
+    BackupRecord,
     Stocktake,
     StocktakeLine,
     StockTransfer,
@@ -30,6 +32,8 @@ from .schemas import (
     StocktakeLine as StocktakeLineSchema,
     StockTransfer as StockTransferSchema,
     StockTransferPreview as StockTransferPreviewSchema,
+    AuditLog as AuditLogSchema,
+    BackupInfo as BackupInfoSchema,
     Receipt as ReceiptSchema,
     ReceiptDetail as ReceiptDetailSchema,
     SessionUser,
@@ -406,4 +410,30 @@ def to_stocktake_adjustment(row: tuple) -> StocktakeAdjustmentSchema:
         quantity=movement.quantity,
         movement_date=movement.movement_date,
         created_at=movement.created_at,
+    )
+
+
+def to_audit_log(entry: AuditLog) -> AuditLogSchema:
+    return AuditLogSchema(
+        id=entry.id,
+        user_id=entry.user_id,
+        username=entry.username,
+        user_name=entry.user_name,
+        action=entry.action,
+        action_label=entry.action_label,
+        document_number=entry.document_number,
+        details=entry.details,
+        created_at=entry.created_at,
+    )
+
+
+def to_backup_info(backup: BackupRecord, base_path: str = "/api") -> BackupInfoSchema:
+    return BackupInfoSchema(
+        id=backup.id,
+        filename=backup.filename,
+        size_bytes=backup.size_bytes,
+        created_by_id=backup.created_by_id,
+        created_by_name=backup.created_by.display_name,
+        created_at=backup.created_at,
+        download_url=f"{base_path}/backups/{backup.id}/download",
     )

@@ -32,6 +32,10 @@ PERMISSIONS = [
     ("transfers:receive", "استلام التحويلات", "تأكيد استلام التحويلات في المخزن المستلم"),
     ("stocktakes:read", "عرض الجرد", "عرض عمليات الجرد والتسويات المرتبطة بها"),
     ("stocktakes:write", "إدارة الجرد", "إنشاء الجرد وإدخال العد الفعلي وإنهاؤه"),
+    ("reports:read", "عرض التقارير", "عرض وتصدير تقارير المخزون والعمليات"),
+    ("audit_logs:read", "عرض سجل التدقيق", "قراءة سجل العمليات غير القابل للحذف"),
+    ("backups:read", "عرض النسخ الاحتياطية", "عرض النسخ المحلية لقاعدة البيانات"),
+    ("backups:write", "إنشاء النسخ الاحتياطية", "إنشاء وتحميل نسخة محلية لقاعدة البيانات"),
 ]
 
 ROLES = [
@@ -63,6 +67,10 @@ ROLES = [
             "transfers:receive",
             "stocktakes:read",
             "stocktakes:write",
+            "reports:read",
+            "audit_logs:read",
+            "backups:read",
+            "backups:write",
         ],
     ),
     (
@@ -90,6 +98,7 @@ ROLES = [
             "transfers:receive",
             "stocktakes:read",
             "stocktakes:write",
+            "reports:read",
         ],
     ),
     (
