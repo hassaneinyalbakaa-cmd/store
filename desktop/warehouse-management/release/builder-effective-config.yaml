@@ -1,0 +1,26 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.warehouse.management
+productName: نظام إدارة المخزن
+artifactName: Warehouse-Management-Setup-${version}.${ext}
+files:
+  - filter:
+      - main.cjs
+      - preload.cjs
+      - setup.html
+asar: true
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  requestedExecutionLevel: asInvoker
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: نظام إدارة المخزن
+  runAfterFinish: true
+electronVersion: 36.9.5
