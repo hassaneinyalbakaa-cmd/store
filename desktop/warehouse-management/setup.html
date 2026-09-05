@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>إعداد الاتصال — نظام إدارة المخزن</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        color: #213238;
+        background: #f6f5f0;
+      }
+      * { box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 28px;
+      }
+      main {
+        width: min(100%, 460px);
+        padding: 34px;
+        border: 1px solid #d9d9d0;
+        border-radius: 18px;
+        background: #fffefa;
+        box-shadow: 0 18px 50px rgba(16, 44, 49, .12);
+      }
+      .mark {
+        display: inline-grid;
+        width: 44px;
+        height: 44px;
+        place-items: center;
+        border-radius: 11px;
+        color: #102c31;
+        background: #f2bb3f;
+        font-size: 22px;
+        font-weight: 800;
+      }
+      .eyebrow {
+        margin: 22px 0 6px;
+        color: #a97811;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .08em;
+      }
+      h1 { margin: 0; font-size: 28px; }
+      p { color: #617075; line-height: 1.8; }
+      label { display: block; margin: 24px 0 8px; font-weight: 700; }
+      input {
+        width: 100%;
+        padding: 13px 14px;
+        border: 1px solid #cfd3cc;
+        border-radius: 8px;
+        color: #213238;
+        background: #fff;
+        direction: ltr;
+        text-align: left;
+        font: inherit;
+      }
+      input:focus {
+        outline: 3px solid rgba(242, 187, 63, .3);
+        border-color: #b98212;
+      }
+      button {
+        width: 100%;
+        margin-top: 18px;
+        padding: 13px 16px;
+        border: 0;
+        border-radius: 8px;
+        color: #102c31;
+        background: #f2bb3f;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 800;
+      }
+      button:disabled { cursor: wait; opacity: .65; }
+      .hint { margin: 12px 0 0; font-size: 12px; }
+      .error {
+        min-height: 22px;
+        margin: 12px 0 0;
+        color: #a83232;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <span class="mark">▣</span>
+      <p class="eyebrow">إعداد أول مرة</p>
+      <h1>الاتصال بالنظام المركزي</h1>
+      <p>
+        أدخل عنوان نسخة النظام المنشورة على الخادم المركزي. سيُحفظ العنوان
+        على هذا الجهاز ويمكن تغييره لاحقًا من قائمة النظام.
+      </p>
+      <form id="connection-form">
+        <label for="server-url">عنوان النظام</label>
+        <input
+          id="server-url"
+          name="server-url"
+          type="url"
+          placeholder="https://warehouse.example.com"
+          autocomplete="url"
+          required
+        />
+        <p id="error" class="error" role="alert"></p>
+        <button id="submit" type="submit">حفظ وفتح النظام</button>
+      </form>
+      <p class="hint">مثال: https://warehouse.example.com أو http://192.168.1.20:8080</p>
+    </main>
+    <script>
+      const form = document.getElementById("connection-form");
+      const input = document.getElementById("server-url");
+      const submit = document.getElementById("submit");
+      const error = document.getElementById("error");
+      window.warehouseDesktop.getServerUrl().then((value) => {
+        input.value = value || "";
+        input.focus();
+      });
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        error.textContent = "";
+        submit.disabled = true;
+        try {
+          await window.warehouseDesktop.saveServerUrl(input.value);
+        } catch (reason) {
+          error.textContent = reason?.message || "تعذر حفظ العنوان.";
+          submit.disabled = false;
+          input.focus();
+        }
+      });
+    </script>
+  </body>
+</html>

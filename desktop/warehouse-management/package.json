@@ -1,0 +1,49 @@
+{
+  "name": "@workspace/warehouse-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Windows desktop client for the Warehouse Management System",
+  "main": "main.cjs",
+  "scripts": {
+    "dev": "electron .",
+    "dist:dir": "electron-builder --dir",
+    "dist:win": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "^36.5.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.warehouse.management",
+    "productName": "نظام إدارة المخزن",
+    "artifactName": "Warehouse-Management-Setup-${version}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "setup.html"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "نظام إدارة المخزن",
+      "runAfterFinish": true
+    }
+  }
+}
