@@ -1,7 +1,6 @@
 import os
 import shutil
 import subprocess
-from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
 
@@ -64,7 +63,6 @@ async def create_backup(
         raise HTTPException(status_code=400, detail="أداة pg_dump غير متاحة على الخادم")
 
     settings = get_settings()
-    now = datetime.now(timezone.utc)
     backup = BackupRecord(
         filename="pending",
         file_path="pending",
@@ -127,8 +125,13 @@ async def download_backup(
     if backup is None:
         raise HTTPException(status_code=404, detail="النسخة الاحتياطية غير موجودة")
     root = backup_dir()
-    path = root / f"warehouse-backup-{backup.id:08d}.dump"
-    if not path.is_file():
+    expected_name = f"warehouse-backup-{backup.id:08d}.dump"
+    path = next(
+        (candidate for candidate in root.glob("warehouse-backup-*.dump")
+         if candidate.name == expected_name and candidate.is_file()),
+        None,
+    )
+    if path is None:
         raise HTTPException(status_code=404, detail="ملف النسخة الاحتياطية غير متاح")
     return FileResponse(
         path,
