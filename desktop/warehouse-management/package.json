@@ -2,6 +2,7 @@
   "name": "@workspace/warehouse-desktop",
   "version": "1.0.0",
   "private": true,
+  "author": "Warehouse Management",
   "description": "Windows desktop client for the Warehouse Management System",
   "main": "main.cjs",
   "scripts": {

@@ -54,3 +54,6 @@ __pycache__/
 .pythonlibs/
 .venv/
 .pytest_cache/
+
+# Desktop release artifacts
+/desktop/warehouse-management/release/
