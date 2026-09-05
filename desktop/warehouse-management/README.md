@@ -4,7 +4,7 @@
 بيانات محلية؛ بل تتصل بنسخة النظام المركزية عبر عنوان HTTP/HTTPS يحدده المستخدم
 في أول تشغيل.
 
-## البناء
+## بناء ملف EXE المحمول
 
 من جذر المشروع:
 
@@ -13,11 +13,24 @@ pnpm install
 pnpm desktop:dist:win
 ```
 
-ينتج المثبت داخل:
+ينتج ملف Windows الذي يعمل مباشرةً داخل:
 
 ```text
-desktop/warehouse-management/release/Warehouse-Management-Setup-1.0.0.exe
+desktop/warehouse-management/release/Warehouse-Management-Portable-1.0.0.exe
 ```
+
+لا يحتاج هذا الملف إلى تثبيت؛ يُنسخ إلى جهاز Windows ويُشغّل مباشرةً.
+
+## بناء مثبت NSIS تقليدي
+
+على جهاز Windows مخصص للبناء:
+
+```bash
+pnpm --filter @workspace/warehouse-desktop run dist:win:installer
+```
+
+يحتاج إنشاء مثبت NSIS من Linux إلى بيئة Wine تسمح بخدمات Windows RPC، وهي
+غير متاحة داخل sandbox الحالي.
 
 ## ملاحظات التشغيل
 

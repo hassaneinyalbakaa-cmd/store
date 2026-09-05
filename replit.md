@@ -11,6 +11,7 @@
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `pnpm desktop:dist:win` — build the portable Windows desktop client
 - Required env: `DATABASE_URL`, `SESSION_SECRET`
 
 ## Stack
@@ -22,6 +23,7 @@
 - Migrations: Alembic
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
+- Desktop: Electron client that connects to the centrally hosted web app
 
 ## Where things live
 
@@ -29,6 +31,7 @@
 - `backend/alembic/` — migration environment and PostgreSQL migrations
 - `backend/seed.py` — initial access-control data and the first administrator
 - `artifacts/warehouse-management/` — React RTL frontend
+- `desktop/warehouse-management/` — Windows desktop client and packaging configuration
 - `lib/api-spec/openapi.yaml` — source of truth for API contracts and generated client hooks
 - `.env.example` — environment settings template
 

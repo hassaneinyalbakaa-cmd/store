@@ -8,16 +8,17 @@
   "scripts": {
     "dev": "electron .",
     "dist:dir": "electron-builder --dir",
-    "dist:win": "electron-builder --win nsis --x64"
+    "dist:win": "electron-builder --win portable --x64",
+    "dist:win:installer": "electron-builder --win nsis --x64"
   },
   "devDependencies": {
-    "electron": "^36.5.0",
+    "electron": "^44.2.0",
     "electron-builder": "^26.0.12"
   },
   "build": {
     "appId": "com.warehouse.management",
     "productName": "نظام إدارة المخزن",
-    "artifactName": "Warehouse-Management-Setup-${version}.${ext}",
+    "artifactName": "Warehouse-Management-Portable-${version}.${ext}",
     "directories": {
       "output": "release"
     },

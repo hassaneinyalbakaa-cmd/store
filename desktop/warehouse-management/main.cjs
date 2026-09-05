@@ -64,6 +64,7 @@ function createSetupWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: true,
       preload: path.join(__dirname, "preload.cjs"),
     },
   });
@@ -85,6 +86,7 @@ function createMainWindow() {
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: true,
     },
   });
 
@@ -96,6 +98,17 @@ function createMainWindow() {
       shell.openExternal(url);
     }
     return { action: "deny" };
+  });
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    try {
+      const configuredOrigin = new URL(readServerUrl()).origin;
+      if (new URL(url).origin !== configuredOrigin) {
+        event.preventDefault();
+        shell.openExternal(url);
+      }
+    } catch {
+      event.preventDefault();
+    }
   });
 }
 

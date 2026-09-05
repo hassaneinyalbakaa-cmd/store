@@ -1,2 +1,3 @@
 - [Alembic revision IDs](alembic-revision-ids.md) — keep revision identifiers at or below 32 characters for this project's PostgreSQL version table.
 - [Backup file paths](backup-file-paths.md) — derive downloadable backup paths from fixed directory patterns, not database-stored path strings.
+- [Windows desktop packaging](windows-desktop-packaging.md) — build portable Electron EXEs on Linux; reserve NSIS installer builds for Windows.
