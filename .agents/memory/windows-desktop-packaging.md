@@ -3,8 +3,8 @@ name: Windows desktop packaging
 description: Environment constraint affecting Electron Windows installer builds.
 ---
 
-Build the Electron `portable` target when producing a Windows EXE inside this Linux workspace. Build the traditional NSIS installer on a Windows build host.
+Build and sign both the Electron `portable` and NSIS targets on a Windows build host.
 
-**Why:** Wine can package Windows Electron binaries here, but the sandbox blocks the Windows RPC service used when electron-builder executes the generated NSIS installer to finalize its uninstaller.
+**Why:** Wine can package an unsigned portable Windows binary here, but the bundled Linux signing tool requires OpenSSL 1.1, which is unavailable in the current Nix channel. The sandbox also blocks the Windows RPC service used when electron-builder finalizes an NSIS uninstaller.
 
-**How to apply:** Keep both portable and NSIS scripts available. Use the portable script for artifacts generated in Replit, and use the NSIS script only in a Windows CI runner or Windows workstation.
+**How to apply:** Keep unsigned Linux packaging only for development. Produce release artifacts with the combined signed build-and-verification command on a Windows CI runner or workstation.

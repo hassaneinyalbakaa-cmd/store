@@ -49,6 +49,17 @@ pnpm --filter @workspace/warehouse-desktop run dist:win:installer:signed
 يحتاج إنشاء مثبت NSIS من Linux إلى بيئة Wine تسمح بخدمات Windows RPC، وهي
 غير متاحة داخل sandbox الحالي.
 
+لبناء الملف المحمول والمثبت والتحقق منهما معًا بأمر واحد على Windows، استخدم:
+
+```powershell
+pnpm --filter @workspace/warehouse-desktop run release:win:signed -- `
+  -CertificatePath "C:\secure\warehouse-code-signing.pfx"
+```
+
+يطلب الأمر كلمة مرور الشهادة بصورة آمنة، ويستخرج اسم الناشر والبصمة من الشهادة
+نفسها، ثم يبني الحزمتين ويشغّل فحص Authenticode عليهما. لا يثبت الشهادة في
+Windows Certificate Store ولا يحفظ كلمة المرور في ملفات المشروع.
+
 إذا كانت الشهادة مخزنة في Windows Certificate Store أو على جهاز توقيع مادي،
 يمكن استخدام اسمها بدل ملف PFX:
 

@@ -14,6 +14,7 @@
     "dist:win:signed": "node scripts/build-windows.cjs portable --require-signing",
     "dist:win:installer": "node scripts/build-windows.cjs nsis",
     "dist:win:installer:signed": "node scripts/build-windows.cjs nsis --require-signing",
+    "release:win:signed": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-and-verify-windows.ps1",
     "verify:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-windows-build.ps1"
   },
   "devDependencies": {
