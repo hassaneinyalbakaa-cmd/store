@@ -7,20 +7,7 @@ if (!["portable", "nsis"].includes(target)) {
   process.exit(2);
 }
 
-const hasCertificateFile = Boolean(process.env.WIN_CSC_LINK || process.env.CSC_LINK);
 const certificateSubjectName = process.env.WINDOWS_CERTIFICATE_SUBJECT_NAME;
-
-if (!hasCertificateFile && !certificateSubjectName) {
-  console.error(
-    [
-      "Windows code-signing credentials are required.",
-      "Set WIN_CSC_LINK and WIN_CSC_KEY_PASSWORD for a PFX/P12 certificate,",
-      "or set WINDOWS_CERTIFICATE_SUBJECT_NAME on a Windows build host.",
-      "The build was stopped to prevent distributing an unsigned executable.",
-    ].join("\n"),
-  );
-  process.exit(1);
-}
 
 const builder = path.join(
   __dirname,

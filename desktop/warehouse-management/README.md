@@ -6,8 +6,11 @@
 
 ## بناء ملف EXE المحمول
 
-يجب أن يملك صاحب النظام شهادة Code Signing سارية بصيغة PFX/P12 وكلمة مرورها.
-ضع مسار الشهادة وكلمة المرور في متغيرات البيئة (ولا تُضف الشهادة إلى Git):
+يمكن بناء الملف من دون شهادة Code Signing. في هذه الحالة سيظهر الناشر في Windows
+باسم `Unknown Publisher` وقد يعرض SmartScreen تحذيرًا عند التشغيل.
+
+لإنتاج ملف موقّع اختياريًا، ضع مسار شهادة PFX/P12 وكلمة مرورها في متغيرات
+البيئة (ولا تُضف الشهادة إلى Git):
 
 ```powershell
 $env:WIN_CSC_LINK = "C:\secure\warehouse-code-signing.pfx"
@@ -21,8 +24,7 @@ pnpm install
 pnpm desktop:dist:win
 ```
 
-يتوقف البناء عمدًا إذا لم يجد شهادة، حتى لا يتم توزيع ملف غير موقّع. ينتج ملف
-Windows الموقع الذي يعمل مباشرةً داخل:
+ينتج ملف Windows الذي يعمل مباشرةً داخل:
 
 ```text
 desktop/warehouse-management/release/Warehouse-Management-Portable-1.0.0.exe
@@ -52,7 +54,8 @@ pnpm --filter @workspace/warehouse-desktop run dist:win:installer
 
 ## التحقق من الناشر والإصدار
 
-بعد البناء على Windows، افحص الملف المحمول والمثبت:
+فحص Authenticode التالي مخصص للحزم الموقّعة فقط. بعد البناء مع شهادة على
+Windows، افحص الملف المحمول والمثبت:
 
 ```powershell
 pnpm --filter @workspace/warehouse-desktop run verify:win -- `

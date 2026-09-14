@@ -22,7 +22,7 @@
     "appId": "com.warehouse.management",
     "productName": "نظام إدارة المخزن",
     "copyright": "Copyright © 2026 Warehouse Management",
-    "forceCodeSigning": true,
+    "forceCodeSigning": false,
     "artifactName": "Warehouse-Management-Portable-${version}.${ext}",
     "directories": {
       "output": "release"
