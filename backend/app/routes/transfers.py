@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 from ..db import get_db
 from ..audit import add_audit_log
 from ..dependencies import require_permission
+from ..inventory import lock_item_inventory
 from ..models import (
     InventoryMovement,
     InventorySerial,
@@ -260,6 +261,7 @@ async def receive_transfer(
     transfer = await require_transfer(db, transferId)
     require_status(transfer, "sent", "مستلم")
     item = transfer.item
+    await lock_item_inventory(db, transfer.item_id)
     current, _ = await source_availability(
         db,
         transfer.item_id,

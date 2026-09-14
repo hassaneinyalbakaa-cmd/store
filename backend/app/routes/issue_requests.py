@@ -9,6 +9,7 @@ from sqlalchemy.orm import selectinload
 from ..db import get_db
 from ..audit import add_audit_log
 from ..dependencies import require_permission
+from ..inventory import lock_item_inventory
 from ..models import (
     Department,
     InventoryMovement,
@@ -115,12 +116,22 @@ async def serialize_request(
 
 
 async def require_request(
-    db: AsyncSession, request_id: int
+    db: AsyncSession, request_id: int, user: User
 ) -> IssueRequest:
     request = await load_issue_request(db, request_id)
-    if request is None:
+    if request is None or not can_access_issue_request(user, request):
         raise not_found("طلب الصرف غير موجود")
     return request
+
+
+def has_global_issue_access(user: User) -> bool:
+    return bool(
+        user.role and user.role.name in {"admin", "warehouse_keeper"}
+    )
+
+
+def can_access_issue_request(user: User, request: IssueRequest) -> bool:
+    return has_global_issue_access(user) or request.created_by_id == user.id
 
 
 def require_status(request: IssueRequest, expected: str, target: str) -> None:
@@ -132,10 +143,10 @@ def require_status(request: IssueRequest, expected: str, target: str) -> None:
 
 @router.get("/issue-requests", response_model=list[IssueRequestSchema])
 async def list_issue_requests(
-    _: User = Depends(require_permission("issue_requests:read")),
+    user: User = Depends(require_permission("issue_requests:read")),
     db: AsyncSession = Depends(get_db),
 ) -> list[IssueRequestSchema]:
-    result = await db.execute(
+    query = (
         select(IssueRequest)
         .options(
             selectinload(IssueRequest.department),
@@ -145,6 +156,9 @@ async def list_issue_requests(
         )
         .order_by(IssueRequest.id.desc())
     )
+    if not has_global_issue_access(user):
+        query = query.where(IssueRequest.created_by_id == user.id)
+    result = await db.execute(query)
     return [await serialize_request(db, request) for request in result.scalars().all()]
 
 
@@ -193,8 +207,11 @@ async def create_issue_request(
             db,
             user=user,
             action="issue",
-            document_number=voucher.issue_number,
-            details=f"القسم: {request.department.name}، الكمية: {request.quantity:g}",
+            document_number=issue_request.request_number,
+            details=(
+                f"طلب الصرف للقسم {issue_request.department.name}، "
+                f"الكمية: {issue_request.quantity:g}"
+            ),
         )
         await db.commit()
     except IntegrityError:
@@ -207,20 +224,20 @@ async def create_issue_request(
 @router.get("/issue-requests/{request_id}", response_model=IssueRequestSchema)
 async def get_issue_request(
     request_id: int,
-    _: User = Depends(require_permission("issue_requests:read")),
+    user: User = Depends(require_permission("issue_requests:read")),
     db: AsyncSession = Depends(get_db),
 ) -> IssueRequestSchema:
-    request = await require_request(db, request_id)
+    request = await require_request(db, request_id, user)
     return await serialize_request(db, request)
 
 
 @router.post("/issue-requests/{request_id}/submit", response_model=IssueRequestSchema)
 async def submit_issue_request(
     request_id: int,
-    _: User = Depends(require_permission("issue_requests:write")),
+    user: User = Depends(require_permission("issue_requests:write")),
     db: AsyncSession = Depends(get_db),
 ) -> IssueRequestSchema:
-    request = await require_request(db, request_id)
+    request = await require_request(db, request_id, user)
     require_status(request, "draft", "sent")
     request.status = "sent"
     await db.commit()
@@ -231,10 +248,10 @@ async def submit_issue_request(
 @router.post("/issue-requests/{request_id}/approve", response_model=IssueRequestSchema)
 async def approve_issue_request(
     request_id: int,
-    _: User = Depends(require_permission("issues:write")),
+    user: User = Depends(require_permission("issues:write")),
     db: AsyncSession = Depends(get_db),
 ) -> IssueRequestSchema:
-    request = await require_request(db, request_id)
+    request = await require_request(db, request_id, user)
     require_status(request, "sent", "approved")
     request.status = "approved"
     request.rejection_reason = None
@@ -247,10 +264,10 @@ async def approve_issue_request(
 async def reject_issue_request(
     request_id: int,
     payload: IssueRequestRejectionInput,
-    _: User = Depends(require_permission("issues:write")),
+    user: User = Depends(require_permission("issues:write")),
     db: AsyncSession = Depends(get_db),
 ) -> IssueRequestSchema:
-    request = await require_request(db, request_id)
+    request = await require_request(db, request_id, user)
     require_status(request, "sent", "rejected")
     if not payload.rejection_reason.strip():
         raise request_error("سبب الرفض مطلوب")
@@ -267,10 +284,10 @@ async def reject_issue_request(
 )
 async def get_issue_request_preview(
     request_id: int,
-    _: User = Depends(require_permission("issues:read")),
+    user: User = Depends(require_permission("issues:read")),
     db: AsyncSession = Depends(get_db),
 ) -> IssueRequestPreviewSchema:
-    request = await require_request(db, request_id)
+    request = await require_request(db, request_id, user)
     require_status(request, "approved", "الصرف")
     current_balance, available_quantity = await get_availability(
         db,
@@ -306,11 +323,12 @@ async def issue_request(
     user: User = Depends(require_permission("issues:write")),
     db: AsyncSession = Depends(get_db),
 ) -> IssueVoucherSchema:
-    request = await require_request(db, request_id)
+    request = await require_request(db, request_id, user)
     require_status(request, "approved", "تم الصرف")
     item = request.item
     warehouse_id = item.warehouse_id
 
+    await lock_item_inventory(db, request.item_id)
     balance_result = await db.execute(
         select(InventoryMovement.quantity).where(
             InventoryMovement.item_id == request.item_id,
@@ -388,10 +406,10 @@ async def issue_request(
 @router.post("/issue-requests/{request_id}/close", response_model=IssueRequestSchema)
 async def close_issue_request(
     request_id: int,
-    _: User = Depends(require_permission("issues:write")),
+    user: User = Depends(require_permission("issues:write")),
     db: AsyncSession = Depends(get_db),
 ) -> IssueRequestSchema:
-    request = await require_request(db, request_id)
+    request = await require_request(db, request_id, user)
     require_status(request, "issued", "مغلق")
     request.status = "closed"
     await db.commit()
@@ -401,11 +419,12 @@ async def close_issue_request(
 
 @router.get("/issue-vouchers", response_model=list[IssueVoucherSchema])
 async def list_issue_vouchers(
-    _: User = Depends(require_permission("issues:read")),
+    user: User = Depends(require_permission("issues:read")),
     db: AsyncSession = Depends(get_db),
 ) -> list[IssueVoucherSchema]:
-    result = await db.execute(
+    query = (
         select(IssueVoucher)
+        .join(IssueVoucher.request)
         .options(
             selectinload(IssueVoucher.request).selectinload(IssueRequest.department),
             selectinload(IssueVoucher.item),
@@ -415,16 +434,19 @@ async def list_issue_vouchers(
         )
         .order_by(IssueVoucher.id.desc())
     )
+    if not has_global_issue_access(user):
+        query = query.where(IssueRequest.created_by_id == user.id)
+    result = await db.execute(query)
     return [to_issue_voucher(voucher) for voucher in result.scalars().all()]
 
 
 @router.get("/issue-vouchers/{voucher_id}", response_model=IssueVoucherSchema)
 async def get_issue_voucher(
     voucher_id: int,
-    _: User = Depends(require_permission("issues:read")),
+    user: User = Depends(require_permission("issues:read")),
     db: AsyncSession = Depends(get_db),
 ) -> IssueVoucherSchema:
     voucher = await load_issue_voucher(db, voucher_id)
-    if voucher is None:
+    if voucher is None or not can_access_issue_request(user, voucher.request):
         raise not_found("سند الصرف غير موجود")
     return to_issue_voucher(voucher)
