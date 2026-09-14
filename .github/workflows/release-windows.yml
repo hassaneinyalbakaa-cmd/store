@@ -1,0 +1,98 @@
+name: Release signed Windows packages
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-sign-and-verify:
+    name: Build, sign, and verify Windows packages
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    env:
+      WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+      WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+
+    steps:
+      - name: Check out the release
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build, sign, and verify Portable and NSIS packages
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:WIN_CSC_LINK)) {
+            throw "The WIN_CSC_LINK repository secret is required."
+          }
+          if ([string]::IsNullOrWhiteSpace($env:WIN_CSC_KEY_PASSWORD)) {
+            throw "The WIN_CSC_KEY_PASSWORD repository secret is required."
+          }
+
+          $certificatePath = Join-Path $env:RUNNER_TEMP "windows-code-signing.pfx"
+          try {
+            try {
+              $certificateBytes = [Convert]::FromBase64String($env:WIN_CSC_LINK)
+            }
+            catch {
+              throw "WIN_CSC_LINK must contain the Base64-encoded PFX/P12 certificate."
+            }
+
+            [IO.File]::WriteAllBytes($certificatePath, $certificateBytes)
+            $certificateBytes = $null
+            $certificatePassword = ConvertTo-SecureString `
+              $env:WIN_CSC_KEY_PASSWORD `
+              -AsPlainText `
+              -Force
+
+            & "./desktop/warehouse-management/scripts/build-and-verify-windows.ps1" `
+              -CertificatePath $certificatePath `
+              -CertificatePassword $certificatePassword
+          }
+          finally {
+            $certificatePassword = $null
+            $env:WIN_CSC_LINK = $null
+            $env:WIN_CSC_KEY_PASSWORD = $null
+            Remove-Item $certificatePath -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Upload signed packages as workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: warehouse-management-windows-${{ github.event.release.tag_name }}
+          path: |
+            desktop/warehouse-management/release/Warehouse-Management-Portable-*.exe
+            desktop/warehouse-management/release/Warehouse-Management-Setup-*.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach signed packages to the GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $packages = Get-ChildItem `
+            "desktop/warehouse-management/release/Warehouse-Management-*.exe"
+          if ($packages.Count -ne 2) {
+            throw "Expected exactly two signed Windows packages, found $($packages.Count)."
+          }
+          gh release upload `
+            "${{ github.event.release.tag_name }}" `
+            @($packages.FullName) `
+            --clobber
