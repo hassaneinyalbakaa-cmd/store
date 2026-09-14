@@ -3,6 +3,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const CONFIG_FILE = "connection.json";
+const WINDOW_ICON = path.join(__dirname, "build", "icon.ico");
 let mainWindow = null;
 let setupWindow = null;
 
@@ -61,6 +62,7 @@ function createSetupWindow() {
     resizable: false,
     title: "إعداد الاتصال — نظام إدارة المخزن",
     backgroundColor: "#f6f5f0",
+    icon: WINDOW_ICON,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -83,6 +85,7 @@ function createMainWindow() {
     minHeight: 680,
     title: "نظام إدارة المخزن",
     backgroundColor: "#102c31",
+    icon: WINDOW_ICON,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

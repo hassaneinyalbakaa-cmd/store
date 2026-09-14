@@ -2,14 +2,17 @@
   "name": "@workspace/warehouse-desktop",
   "version": "1.0.0",
   "private": true,
-  "author": "Warehouse Management",
+  "author": {
+    "name": "Warehouse Management"
+  },
   "description": "Windows desktop client for the Warehouse Management System",
   "main": "main.cjs",
   "scripts": {
     "dev": "electron .",
     "dist:dir": "electron-builder --dir",
-    "dist:win": "electron-builder --win portable --x64",
-    "dist:win:installer": "electron-builder --win nsis --x64"
+    "dist:win": "node scripts/build-windows.cjs portable",
+    "dist:win:installer": "node scripts/build-windows.cjs nsis",
+    "verify:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-windows-build.ps1"
   },
   "devDependencies": {
     "electron": "^44.2.0",
@@ -18,6 +21,8 @@
   "build": {
     "appId": "com.warehouse.management",
     "productName": "نظام إدارة المخزن",
+    "copyright": "Copyright © 2026 Warehouse Management",
+    "forceCodeSigning": true,
     "artifactName": "Warehouse-Management-Portable-${version}.${ext}",
     "directories": {
       "output": "release"
@@ -25,10 +30,21 @@
     "files": [
       "main.cjs",
       "preload.cjs",
-      "setup.html"
+      "setup.html",
+      "build/icon.ico"
     ],
     "asar": true,
     "win": {
+      "icon": "build/icon.ico",
+      "executableName": "WarehouseManagement",
+      "legalTrademarks": "Warehouse Management",
+      "signAndEditExecutable": true,
+      "signtoolOptions": {
+        "signingHashAlgorithms": [
+          "sha256"
+        ],
+        "timeStampServer": "http://timestamp.digicert.com"
+      },
       "target": [
         {
           "target": "nsis",
@@ -40,6 +56,9 @@
       "requestedExecutionLevel": "asInvoker"
     },
     "nsis": {
+      "artifactName": "Warehouse-Management-Setup-${version}.${ext}",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
