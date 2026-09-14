@@ -11,7 +11,9 @@
     "dev": "electron .",
     "dist:dir": "electron-builder --dir",
     "dist:win": "node scripts/build-windows.cjs portable",
+    "dist:win:signed": "node scripts/build-windows.cjs portable --require-signing",
     "dist:win:installer": "node scripts/build-windows.cjs nsis",
+    "dist:win:installer:signed": "node scripts/build-windows.cjs nsis --require-signing",
     "verify:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-windows-build.ps1"
   },
   "devDependencies": {

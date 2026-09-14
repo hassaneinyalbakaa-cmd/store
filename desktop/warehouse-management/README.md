@@ -21,8 +21,14 @@ $env:WIN_CSC_KEY_PASSWORD = Read-Host "كلمة مرور الشهادة" -MaskIn
 
 ```bash
 pnpm install
-pnpm desktop:dist:win
+pnpm --filter @workspace/warehouse-desktop run dist:win:signed
 ```
+
+يمكن حفظ `WIN_CSC_LINK` و`WIN_CSC_KEY_PASSWORD` في Replit Secrets بدل ضبطهما
+يدويًا. يقبل `WIN_CSC_LINK` ما يدعمه `electron-builder`، مثل مسار ملف PFX/P12
+خاص أو رابط خاص أو محتوى Base64 للشهادة. لا تُحفظ الشهادة أو كلمة مرورها في Git.
+يفشل أمر `dist:win:signed` قبل البناء إذا لم تتوفر هوية توقيع، ولا ينتج حزمة
+يُظن خطأً أنها موقعة.
 
 ينتج ملف Windows الذي يعمل مباشرةً داخل:
 
@@ -37,7 +43,7 @@ desktop/warehouse-management/release/Warehouse-Management-Portable-1.0.0.exe
 على جهاز Windows مخصص للبناء، وبعد ضبط متغيرات الشهادة نفسها:
 
 ```bash
-pnpm --filter @workspace/warehouse-desktop run dist:win:installer
+pnpm --filter @workspace/warehouse-desktop run dist:win:installer:signed
 ```
 
 يحتاج إنشاء مثبت NSIS من Linux إلى بيئة Wine تسمح بخدمات Windows RPC، وهي
@@ -48,9 +54,11 @@ pnpm --filter @workspace/warehouse-desktop run dist:win:installer
 
 ```powershell
 $env:WINDOWS_CERTIFICATE_SUBJECT_NAME = "اسم الناشر كما يظهر في الشهادة"
-pnpm --filter @workspace/warehouse-desktop run dist:win
-pnpm --filter @workspace/warehouse-desktop run dist:win:installer
+pnpm --filter @workspace/warehouse-desktop run dist:win:signed
+pnpm --filter @workspace/warehouse-desktop run dist:win:installer:signed
 ```
+
+تبقى أوامر `dist:win` و`dist:win:installer` متاحة للبناء غير الموقّع المتعمد.
 
 ## التحقق من الناشر والإصدار
 
