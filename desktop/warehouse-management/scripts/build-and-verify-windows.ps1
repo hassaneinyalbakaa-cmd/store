@@ -2,10 +2,41 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$CertificatePath,
 
-  [SecureString]$CertificatePassword
+  [SecureString]$CertificatePassword,
+
+  [ValidateRange(1, 3650)]
+  [int]$CertificateExpiryWarningDays = 60,
+
+  [ValidateRange(0, 3650)]
+  [int]$CertificateExpiryErrorDays = 30
 )
 
 $ErrorActionPreference = "Stop"
+
+function Test-CertificateExpiry {
+  param(
+    [Parameter(Mandatory = $true)]
+    [Security.Cryptography.X509Certificates.X509Certificate2]$Certificate
+  )
+
+  if ($CertificateExpiryWarningDays -lt $CertificateExpiryErrorDays) {
+    throw "CertificateExpiryWarningDays must be greater than or equal to CertificateExpiryErrorDays."
+  }
+
+  $expiresAt = $Certificate.NotAfter.ToUniversalTime()
+  $remaining = $expiresAt - [DateTime]::UtcNow
+  $remainingDays = [Math]::Floor($remaining.TotalDays)
+
+  Write-Host "Signing certificate expires (UTC): $($expiresAt.ToString('yyyy-MM-dd HH:mm:ss'))"
+  Write-Host "Signing certificate remaining validity: $remainingDays day(s)"
+
+  if ($remaining.TotalDays -le $CertificateExpiryErrorDays) {
+    throw "Signing certificate expires in $remainingDays day(s), at or below the $CertificateExpiryErrorDays-day release blocking threshold. Replace the certificate before building."
+  }
+  if ($remaining.TotalDays -le $CertificateExpiryWarningDays) {
+    Write-Warning "Signing certificate expires in $remainingDays day(s), within the $CertificateExpiryWarningDays-day warning threshold. Start certificate renewal now."
+  }
+}
 
 if (-not $IsWindows -and $PSVersionTable.PSEdition -eq "Core") {
   throw "This release command must run on Windows."
@@ -33,6 +64,7 @@ try {
   if (-not $certificate.HasPrivateKey) {
     throw "The certificate does not contain a private key."
   }
+  Test-CertificateExpiry -Certificate $certificate
 
   $env:WIN_CSC_LINK = $certificateFile
   $env:WIN_CSC_KEY_PASSWORD = $plainPassword
@@ -64,7 +96,9 @@ try {
     & (Join-Path $PSScriptRoot "verify-windows-build.ps1") `
       -Path "$portable,$installer" `
       -ExpectedPublisherSubject $certificate.Subject `
-      -ExpectedCertificateThumbprint $certificate.Thumbprint
+      -ExpectedCertificateThumbprint $certificate.Thumbprint `
+      -CertificateExpiryWarningDays $CertificateExpiryWarningDays `
+      -CertificateExpiryErrorDays $CertificateExpiryErrorDays
 
     if ($LASTEXITCODE -ne 0) {
       throw "Windows package verification failed with exit code $LASTEXITCODE."

@@ -60,6 +60,18 @@ pnpm --filter @workspace/warehouse-desktop run release:win:signed -- `
 نفسها، ثم يبني الحزمتين ويشغّل فحص Authenticode عليهما. لا يثبت الشهادة في
 Windows Certificate Store ولا يحفظ كلمة المرور في ملفات المشروع.
 
+يفحص الأمر تاريخ انتهاء الشهادة **قبل بدء البناء**. يعرض التاريخ بتوقيت UTC
+وعدد الأيام المتبقية، ويحذر عند بقاء 60 يومًا أو أقل، ويوقف الإصدار عند بقاء
+30 يومًا أو أقل. يمكن تعديل المدتين صراحةً عند الحاجة، على أن تكون مدة التحذير
+أكبر من مدة الإيقاف أو مساوية لها:
+
+```powershell
+pnpm --filter @workspace/warehouse-desktop run release:win:signed -- `
+  -CertificatePath "C:\secure\warehouse-code-signing.pfx" `
+  -CertificateExpiryWarningDays 90 `
+  -CertificateExpiryErrorDays 45
+```
+
 إذا كانت الشهادة مخزنة في Windows Certificate Store أو على جهاز توقيع مادي،
 يمكن استخدام اسمها بدل ملف PFX:
 
@@ -88,6 +100,36 @@ pnpm --filter @workspace/warehouse-desktop run verify:win -- `
 الشهادة (وبصمتها عند تحديدها)، أو إذا لم تطابق خصائص الملف اسم المنتج
 `نظام إدارة المخزن`، واسم الشركة `Warehouse Management`، والإصدار الموجود في
 `package.json`.
+
+يعرض هذا الفحص أيضًا تاريخ انتهاء شهادة التوقيع الفعلية داخل كل حزمة، ويطبق
+افتراضيًا سياسة التحذير قبل 60 يومًا والإيقاف قبل 30 يومًا. يمكن تمرير
+`-CertificateExpiryWarningDays` و`-CertificateExpiryErrorDays` لتغييرها.
+
+## استبدال شهادة التوقيع بأمان
+
+1. اطلب تجديد شهادة Code Signing قبل دخول مدة الإيقاف، واحتفظ بملف PFX/P12
+   الجديد وكلمة مروره في مخزن أسرار مخصص؛ لا ترسلهما عبر المحادثات ولا تضفهما
+   إلى Git.
+2. على جهاز Windows موثوق، اعرض بصمة SHA-1 واسم الناشر وتاريخ الانتهاء:
+
+   ```powershell
+   $password = Read-Host "كلمة مرور الشهادة الجديدة" -AsSecureString
+   $certificate = Get-PfxCertificate `
+     -FilePath "C:\secure\warehouse-code-signing-new.pfx" `
+     -Password $password
+   $certificate | Format-List Subject, Thumbprint, NotBefore, NotAfter, HasPrivateKey
+   ```
+
+3. تحقق عبر قناة مستقلة مع الجهة المسؤولة عن الشهادة من أن `Subject` والبصمة
+   المعروضين هما القيمتان المتوقعتان، وأن `HasPrivateKey` يساوي `True`. البصمة
+   ليست سرًا، لكن يجب عدم نسخها من ملف أو رسالة غير موثوقين.
+4. استبدل `WIN_CSC_LINK` و`WIN_CSC_KEY_PASSWORD` في مخزن الأسرار بالقيم الجديدة،
+   ثم نفّذ إصدارًا تجريبيًا. مرّر بصمة الشهادة الجديدة إلى
+   `-ExpectedCertificateThumbprint` عند الفحص؛ يقبل الفحص البصمة مع المسافات أو
+   من دونها.
+5. لا تحذف الشهادة القديمة قبل نجاح بناء الحزمتين والتحقق من أن الناشر والبصمة
+   وتاريخ الانتهاء المعروضة تخص الشهادة الجديدة. بعد النجاح، ألغِ الوصول إلى
+   الملف القديم وفق سياسة حفظ المفاتيح في المؤسسة.
 
 > التوقيع الصحيح يعرّف الناشر ويحمي الملف من التعديل، لكنه لا يضمن اختفاء
 > SmartScreen فورًا مع شهادة جديدة؛ تبني Microsoft سمعة للشهادة والملف بمرور
