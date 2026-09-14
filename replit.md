@@ -5,14 +5,14 @@
 ## Run & Operate
 
 - `uv run alembic upgrade head` — apply PostgreSQL migrations
-- `uv run python -m backend.seed` — create the initial roles, permissions, and admin user
+- `uv run python -m backend.seed` — create the initial roles, permissions, and admin user; set `ADMIN_INITIAL_PASSWORD` to a unique password of at least 12 characters before the first run
 - `uv run uvicorn backend.app.main:app --host 0.0.0.0 --port 8080` — run the FastAPI server
 - `pnpm --filter @workspace/warehouse-management run dev` — run the React frontend
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm desktop:dist:win` — build the portable Windows desktop client
-- Required env: `DATABASE_URL`, `SESSION_SECRET`
+- Required env: `DATABASE_URL`, `SESSION_SECRET`; `ADMIN_INITIAL_PASSWORD` is required only when the seed creates the first administrator
 
 ## Stack
 
@@ -55,7 +55,7 @@
 ## Gotchas
 
 - Apply Alembic migrations before seeding or starting FastAPI.
-- The seeded development administrator is `admin` / `Admin@12345`; change it after first login in a real deployment.
+- The seed creates the `admin` administrator from `ADMIN_INITIAL_PASSWORD` and never changes an existing administrator. Set that secret only for initial provisioning and remove it from the environment afterward.
 
 ## Pointers
 

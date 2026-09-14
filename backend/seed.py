@@ -3,6 +3,7 @@ import asyncio
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from .app.config import get_settings
 from .app.db import SessionLocal
 from .app.models import Permission, Role, User
 from .app.security import hash_password
@@ -110,6 +111,17 @@ ROLES = [
 ]
 
 
+def initial_admin_password() -> str:
+    password = get_settings().admin_initial_password
+    if not password:
+        raise RuntimeError(
+            "ADMIN_INITIAL_PASSWORD must be set before creating the initial admin user"
+        )
+    if len(password) < 12:
+        raise RuntimeError("ADMIN_INITIAL_PASSWORD must be at least 12 characters")
+    return password
+
+
 async def seed() -> None:
     async with SessionLocal() as db:
         permission_map: dict[str, Permission] = {}
@@ -145,7 +157,7 @@ async def seed() -> None:
                 User(
                     username="admin",
                     display_name="مدير النظام",
-                    password_hash=hash_password("Admin@12345"),
+                    password_hash=hash_password(initial_admin_password()),
                     role_id=role_map["admin"].id,
                     is_active=True,
                 )

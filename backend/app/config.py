@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str
     session_secret: str
+    admin_initial_password: str | None = None
     session_cookie_name: str = "warehouse_session"
     session_ttl_hours: int = 8
     cors_origins: str = ""
