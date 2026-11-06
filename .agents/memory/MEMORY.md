@@ -1,4 +1,5 @@
 - [Alembic revision IDs](alembic-revision-ids.md) — keep revision identifiers at or below 32 characters for this project's PostgreSQL version table.
 - [Backup file paths](backup-file-paths.md) — derive downloadable backup paths from fixed directory patterns, not database-stored path strings.
-- [Windows desktop packaging](windows-desktop-packaging.md) — build portable Electron EXEs on Linux; reserve NSIS installer builds for Windows.
+- [Windows desktop packaging](windows-desktop-packaging.md) — build and sign release packages on Windows; Linux packaging is development-only.
+- [GitHub delivery access](github-delivery-access.md) — source stays private; Git proxy access may work even when API integration access is unavailable.
 - [Final delivery standard](final-delivery.md) — never equate build scripts or a portable EXE with a verified Windows installer and a working production service.
