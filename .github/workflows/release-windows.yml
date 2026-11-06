@@ -3,6 +3,11 @@ name: Release signed Windows packages
 on:
   release:
     types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -13,13 +18,19 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
 
-    env:
-      WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-      WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-
     steps:
       - name: Check out the release
         uses: actions/checkout@v4
+
+      - name: Check version and release tag
+        id: version
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          $version = node desktop/warehouse-management/scripts/check-release-version.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Release version validation failed." }
+          "version=$version" >> $env:GITHUB_OUTPUT
 
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
@@ -37,6 +48,9 @@ jobs:
 
       - name: Build, sign, and verify Portable and NSIS packages
         shell: pwsh
+        env:
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: |
           if ([string]::IsNullOrWhiteSpace($env:WIN_CSC_LINK)) {
             throw "The WIN_CSC_LINK repository secret is required."
@@ -72,20 +86,34 @@ jobs:
             Remove-Item $certificatePath -Force -ErrorAction SilentlyContinue
           }
 
+      - name: Record package checksums
+        shell: pwsh
+        run: |
+          $directory = "desktop/warehouse-management/release"
+          $packages = @(Get-ChildItem "$directory/Warehouse-Management-*.exe")
+          if ($packages.Count -ne 2) { throw "Expected exactly two Windows packages." }
+          $packages | Sort-Object Name | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)"
+          } | Set-Content "$directory/SHA256SUMS.txt" -Encoding ascii
+
       - name: Upload signed packages as workflow artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: warehouse-management-windows-${{ github.event.release.tag_name }}
+          name: warehouse-management-windows-${{ steps.version.outputs.version }}-${{ github.run_id }}
           path: |
             desktop/warehouse-management/release/Warehouse-Management-Portable-*.exe
             desktop/warehouse-management/release/Warehouse-Management-Setup-*.exe
+            desktop/warehouse-management/release/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
 
       - name: Attach signed packages to the GitHub release
+        if: github.event_name == 'release'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
           $packages = Get-ChildItem `
             "desktop/warehouse-management/release/Warehouse-Management-*.exe"
@@ -93,6 +121,6 @@ jobs:
             throw "Expected exactly two signed Windows packages, found $($packages.Count)."
           }
           gh release upload `
-            "${{ github.event.release.tag_name }}" `
+            "$env:RELEASE_TAG" `
             @($packages.FullName) `
-            --clobber
+            "desktop/warehouse-management/release/SHA256SUMS.txt"

@@ -29,14 +29,10 @@ if (requireSigning && certificateLink && !process.env.WIN_CSC_KEY_PASSWORD) {
   process.exit(1);
 }
 
-const builder = path.join(
-  __dirname,
-  "..",
-  "node_modules",
-  ".bin",
-  process.platform === "win32" ? "electron-builder.cmd" : "electron-builder",
-);
-const args = ["--win", target, "--x64"];
+// Invoke the JavaScript entry point, not a .cmd shim. Recent Node versions
+// cannot spawn Windows batch files directly without a shell.
+const builder = require.resolve("electron-builder/cli.js");
+const args = [builder, "--win", target, "--x64"];
 
 if (requireSigning) {
   args.push("--config.forceCodeSigning=true");
@@ -48,7 +44,7 @@ if (certificateSubjectName) {
   );
 }
 
-const result = spawnSync(builder, args, {
+const result = spawnSync(process.execPath, args, {
   cwd: path.join(__dirname, ".."),
   env: process.env,
   stdio: "inherit",

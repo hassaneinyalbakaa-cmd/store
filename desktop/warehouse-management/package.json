@@ -18,8 +18,8 @@
     "verify:win": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-windows-build.ps1"
   },
   "devDependencies": {
-    "electron": "^44.2.0",
-    "electron-builder": "^26.0.12"
+    "electron": "^44.10.2",
+    "electron-builder": "^26.18.0"
   },
   "build": {
     "appId": "com.warehouse.management",
