@@ -1,0 +1,100 @@
+name: Build Windows installer without certificate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-unsigned-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-unsigned:
+    name: Build unsigned installer and portable package
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      CSC_LINK: ""
+      CSC_KEY_PASSWORD: ""
+      WIN_CSC_LINK: ""
+      WIN_CSC_KEY_PASSWORD: ""
+      WINDOWS_CERTIFICATE_SUBJECT_NAME: ""
+
+    steps:
+      - name: Check out current source
+        uses: actions/checkout@v4
+
+      - name: Validate package version
+        id: version
+        shell: pwsh
+        run: |
+          node --test desktop/warehouse-management/scripts/check-release-version.test.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Version tests failed." }
+          $version = node desktop/warehouse-management/scripts/check-release-version.cjs
+          if ($LASTEXITCODE -ne 0) { throw "Version validation failed." }
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build portable package
+        run: pnpm --filter @workspace/warehouse-desktop run dist:win
+
+      - name: Build NSIS installer
+        run: pnpm --filter @workspace/warehouse-desktop run dist:win:installer
+
+      - name: Check unsigned packages and record checksums
+        shell: pwsh
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $directory = "desktop/warehouse-management/release"
+          $packages = @(Get-ChildItem "$directory/Warehouse-Management-*.exe")
+          if ($packages.Count -ne 2) { throw "Expected exactly two Windows packages." }
+          foreach ($kind in @("Setup", "Portable")) {
+            $file = Join-Path $directory "Warehouse-Management-$kind-$env:PACKAGE_VERSION.exe"
+            if (!(Test-Path $file) -or (Get-Item $file).Length -lt 1MB) {
+              throw "Missing or invalid $kind package."
+            }
+            $signature = Get-AuthenticodeSignature $file
+            if ($signature.Status.ToString() -ne "NotSigned") {
+              throw "Expected explicitly unsigned package: $file"
+            }
+          }
+          $packages | Sort-Object Name | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$hash  $($_.Name)"
+          } | Set-Content "$directory/SHA256SUMS.txt" -Encoding ascii
+          @(
+            "UNSIGNED WINDOWS PACKAGES - publisher identity is not certified."
+            "Windows may show an Unknown Publisher or SmartScreen warning."
+            "SHA256SUMS.txt checks file integrity, not publisher identity."
+            "Installation and application operation still require testing."
+            "Source commit: $env:GITHUB_SHA"
+          ) | Set-Content "$directory/UNSIGNED-NOTICE.txt" -Encoding utf8
+
+      - name: Upload unsigned packages for download
+        uses: actions/upload-artifact@v4
+        with:
+          name: warehouse-management-windows-UNSIGNED-${{ steps.version.outputs.version }}-${{ github.run_id }}
+          path: |
+            desktop/warehouse-management/release/Warehouse-Management-Portable-*.exe
+            desktop/warehouse-management/release/Warehouse-Management-Setup-*.exe
+            desktop/warehouse-management/release/SHA256SUMS.txt
+            desktop/warehouse-management/release/UNSIGNED-NOTICE.txt
+          if-no-files-found: error
+          retention-days: 30
