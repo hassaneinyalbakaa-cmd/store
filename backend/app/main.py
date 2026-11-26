@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .admin_recovery import recover_admin_on_startup
 from .config import get_settings
 from .routes import (
     access,
@@ -23,6 +24,7 @@ from .routes import (
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    await recover_admin_on_startup(get_settings())
     yield
 
 

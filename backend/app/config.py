@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,6 +10,8 @@ class Settings(BaseSettings):
     database_url: str
     session_secret: str
     admin_initial_password: str | None = None
+    admin_reset_request_id: str | None = None
+    admin_reset_password: SecretStr | None = None
     session_cookie_name: str = "warehouse_session"
     session_ttl_hours: int = 8
     cors_origins: str = ""
